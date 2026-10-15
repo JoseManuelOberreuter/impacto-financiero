@@ -91,6 +91,15 @@ Plan completo en [sentimiento-noticias.md](sentimiento-noticias.md).
 - **Feed de noticias** (ya existe en la pestaña Noticias): reemplazar los titulares de ejemplo por reales, con su tono y su tema.
 - **Titular del día que se actualiza** cuando cambia algo importante, no solo una vez al día.
 
+## Fase 4b: planes y capacidades
+
+Plan completo en [planes.md](planes.md).
+
+- [ ] Catálogo de capacidades y variable `MODO_PLANES` (empezar en `abierto`).
+- [ ] Endpoint `GET /v1/yo/capacidades` y recorte de datos en la API según capacidades.
+- [ ] Tablas `planes`, `capacidades`, `plan_capacidades` y `uso_capacidades`.
+- [ ] Más adelante: `suscripciones`, RevenueCat, organizaciones y claves de API.
+
 ## Fase 5: calidad y operación
 
 - [ ] **Tests de cada conector** con archivos de ejemplo guardados, para detectar cuando una fuente cambia su formato.

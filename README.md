@@ -23,7 +23,7 @@ Una sola base de datos y distintas capas de producto, que se lanzan en orden:
 | 2 | Inversionistas | Pago (Pro) | Históricos, alertas, hechos esenciales filtrados, descargas |
 | 3 | Pymes y contadores | Pago | Reajuste por IPC, impacto del dólar en costos, calendario tributario |
 
-**Foco actual: etapa 1.**
+**Foco actual: etapa 1.** Los planes (Gratis, Pro y Empresas) y cómo se activan están en [docs/planes.md](docs/planes.md).
 
 ## Fuentes de datos
 
@@ -98,6 +98,7 @@ Cada directorio tiene su README con las instrucciones para correrlo en local.
 | [docs/arquitectura.md](docs/arquitectura.md) | Stack, repositorios, backend, base de datos, app y despliegue |
 | [docs/investigacion-fuentes-ampliadas.md](docs/investigacion-fuentes-ampliadas.md) | Más fuentes chilenas e internacionales, datos propios que salen de cruzarlas y tabla maestra de fuentes |
 | [docs/banco-central-series.md](docs/banco-central-series.md) | Códigos de las series del Banco Central por termómetro, cómo usar su API y datos propios que salen de cruzarlas |
+| [docs/planes.md](docs/planes.md) | Planes Gratis, Pro y Empresas, capacidades por plan, modos de activación y tablas de la base |
 | [docs/pendientes-backend.md](docs/pendientes-backend.md) | Lista de pendientes del backend: claves, base de datos, conectores, cálculos y noticias |
 
 ## Arquitectura
