@@ -74,7 +74,7 @@ Sigue [../docs/termometros.md](../docs/termometros.md) y [../docs/investigacion-
 
 - Minimalista, con superficies de **vidrio** (Liquid Glass nativo en iOS 26; desenfoque en web) sobre un fondo de luces difusas.
 - El **Inicio** sigue la propuesta G de Figma: fecha arriba a la derecha, titular del día, canasta con mini gráfico, "Lo que cambió esta semana" con flechas y mini gráficos, y termómetros en tarjetas. El detalle vive en las otras secciones.
-- **Fondo de un solo tono azul**, el mismo en todas las pestañas.
+- **Fondo "piedra cálida"** en claro y oscuro, el mismo en todas las pestañas. La paleta activa se elige en `src/constants/theme.ts` (también están verde azulado y piedra fresca).
 - Nivel de **presión** siempre escrito (no solo con color), con su tendencia.
 - Gráficos con la **banda de lo normal** en el detalle de cada indicador.
 - Íconos de [Lucide](https://lucide.dev) en web y en la app; SF Symbols y Material Symbols en las pestañas nativas. **No se usan emojis.**
