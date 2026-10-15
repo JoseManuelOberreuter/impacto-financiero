@@ -96,6 +96,8 @@ Cada directorio tiene su README con las instrucciones para correrlo en local.
 | [docs/sentimiento-noticias.md](docs/sentimiento-noticias.md) | Cómo convertir las noticias diarias en el termómetro Ánimo |
 | [docs/investigacion-diseno.md](docs/investigacion-diseno.md) | Investigación internacional y chilena de apps económicas y termómetros: fortalezas, debilidades y qué aplicamos |
 | [docs/arquitectura.md](docs/arquitectura.md) | Stack, repositorios, backend, base de datos, app y despliegue |
+| [docs/investigacion-fuentes-ampliadas.md](docs/investigacion-fuentes-ampliadas.md) | Más fuentes chilenas e internacionales, datos propios que salen de cruzarlas y tabla maestra de fuentes |
+| [docs/pendientes-backend.md](docs/pendientes-backend.md) | Lista de pendientes del backend: claves, base de datos, conectores, cálculos y noticias |
 
 ## Arquitectura
 
