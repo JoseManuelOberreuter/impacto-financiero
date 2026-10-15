@@ -160,6 +160,7 @@ Complementan la sección 4 de [investigacion-fuentes-ampliadas.md](investigacion
 
 ## Siguientes pasos
 
-1. Guardar este catálogo como configuración del conector: una lista de códigos, con el termómetro y la frecuencia de cada uno.
-2. Hacer el conector del Banco Central: descarga inicial de 5 años de historia y después actualización diaria.
-3. Calcular el estado de presión con percentiles de 5 años, según [termometros.md](termometros.md).
+1. ~~Primera foto real~~: hecha el 15-oct-2026. [`scripts/snapshot_bcch.py`](../impacto-api/scripts/snapshot_bcch.py) descarga 6 años de 16 series (dólar, euro, UF, UTM, TPM, cobre, WTI, IPC, IMACEC, desempleo, tasas hipotecaria y de consumo, IPEC y expectativas de IPC y TPM) a `app/datos_ejemplo/bcch_snapshot.json`. Los termómetros Deudas, Actividad y Dólar, el IPC de Bolsillo y el Inicio ya la usan.
+2. ~~Presión calculada~~: hecha en `app/calculos/presion.py` (percentiles 20/80 de 5 años). En un termómetro con varios indicadores, manda la presión más alta.
+3. **Pendiente: guardar en Supabase** en vez del JSON y correr la descarga a diario en el worker (fase 1 de [pendientes-backend.md](pendientes-backend.md)).
+4. Sumar al catálogo del script las series de la capa Pro: expectativas completas, ventas diarias, IMCE y vivienda.

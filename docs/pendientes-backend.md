@@ -1,6 +1,6 @@
 # Pendientes del backend
 
-> Estado al 15-oct-2026. La app tiene el front y la API con datos de ejemplo; **todavía no hay ninguna fuente conectada en forma automática ni base de datos.** Solo ODEPA y las AFP tienen datos reales, como foto cargada a mano con un script.
+> Estado al 15-oct-2026. La app tiene el front y la API con datos de ejemplo; **todavía no hay ninguna fuente conectada en forma automática ni base de datos.** ODEPA, las AFP y 16 series del Banco Central tienen datos reales, como fotos cargadas a mano con scripts.
 > Fuentes: [fuentes-de-datos.md](fuentes-de-datos.md) y [investigacion-fuentes-ampliadas.md](investigacion-fuentes-ampliadas.md). Arquitectura: [arquitectura.md](arquitectura.md).
 
 ## Dónde estamos
@@ -8,11 +8,11 @@
 | Pieza | Estado |
 |---|---|
 | API (FastAPI) con todos los endpoints | ✅ Hecha, con datos de ejemplo |
-| Fotos reales de ODEPA y AFP (scripts) | ✅ Hechas, manuales |
+| Fotos reales de ODEPA, AFP y Banco Central (scripts) | ✅ Hechas, manuales |
 | Base de datos (Supabase) | ❌ No existe |
 | Worker de ingesta programado | ❌ No existe |
 | Conectores automáticos | ❌ Ninguno |
-| Cálculo real del estado de presión | ❌ Hoy el estado se escribe a mano |
+| Cálculo real del estado de presión | 🟡 Hecho para los indicadores del Banco Central (`app/calculos/presion.py`); el resto sigue a mano |
 | Recolector y clasificador de noticias | ❌ No existe |
 | Despliegue (Railway, Vercel, tiendas) | ❌ No existe |
 
@@ -48,7 +48,7 @@
 
 | Prioridad | Conector | Frecuencia | Nota |
 |---|---|---|---|
-| 1 | Banco Central (BDE) | Diaria + calendario de publicaciones | Catálogo de códigos listo en [banco-central-series.md](banco-central-series.md); buscar más con `scripts/catalogo_bcch.py` |
+| 1 | Banco Central (BDE) | Diaria + calendario de publicaciones | Catálogo listo en [banco-central-series.md](banco-central-series.md). `scripts/snapshot_bcch.py` ya descarga 16 series a un JSON: **falta que guarde en Supabase** y correrlo a diario en el worker |
 | 1 | ODEPA | Semanal (viernes) | Convertir `snapshot_odepa.py` en conector |
 | 1 | Superintendencia de Pensiones (valor cuota) | Diaria | Convertir `snapshot_afp.py`; reprocesar los datos provisionales cuando se confirmen |
 | 1 | CMF (TMC, tasas, UTM) | Diaria / mensual | |
@@ -64,7 +64,7 @@
 
 ## Fase 3: cálculos
 
-- [ ] **Estado de presión real:** comparar cada indicador con su historia de 5 años (percentiles 20/80), como dice [termometros.md](termometros.md). Hoy se escribe a mano.
+- [x] **Estado de presión real** para los indicadores del Banco Central: percentiles 20/80 de 5 años ([termometros.md](termometros.md)), en `app/calculos/presion.py`. Falta aplicarlo a ODEPA, AFP y bencina cuando tengan historia guardada.
 - [ ] **Regla para combinar indicadores** en el estado de cada termómetro (está pendiente desde el diseño).
 - [ ] **Índice de canasta automático,** con bencina y gas reales de la CNE ([indice-canasta.md](indice-canasta.md)).
 - [ ] **"Lo que cambió esta semana"** a partir de las observaciones reales.
