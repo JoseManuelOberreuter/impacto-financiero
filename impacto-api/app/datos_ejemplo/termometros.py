@@ -1,15 +1,18 @@
 """Termómetros de ejemplo.
 
 Bolsillo y Ahorro usan las fotos reales de ODEPA y de la Superintendencia de
-Pensiones. El resto de las cifras (IPC, TPM, desempleo, dólar, tono de noticias)
-son valores de ejemplo.
+Pensiones. IPC, TPM, tasa hipotecaria, desempleo, IMACEC, dólar, cobre e IPEC
+vienen de la foto real del Banco Central (banco_central.py), con la presión
+calculada sobre 5 años. La bencina y el tono de las noticias siguen de ejemplo.
 """
 
 import json
 import statistics
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 
+from app.calculos.presion import la_mas_alta
+from app.datos_ejemplo import banco_central as bc
 from app.datos_ejemplo.precios import CANASTA, PRODUCTOS_POR_ID
 from app.modelos.termometros import (
     BandaNormal,
@@ -59,6 +62,99 @@ def _mediana_fondo(fondo: str, campo: str) -> float:
 _AFP_AL = date.fromisoformat(_AFP["dato_al"])
 _MARRAQUETA = PRODUCTOS_POR_ID["marraqueta"]
 
+# --- Datos reales del Banco Central (bcch_snapshot.json) ---
+
+_TPM = bc.SERIES["tpm"]
+_TPM_CAMBIO = _TPM.ultimo.valor - _TPM.antes_de(30).valor
+_TPM_ESPERADA = bc.SERIES["tpm_esperada_11m"].ultimo.valor
+_HIPOTECARIA = bc.SERIES["tasa_hipotecaria"]
+_DESEMPLEO = bc.SERIES["desempleo"]
+_DESEMPLEO_12M = _DESEMPLEO.ultimo.valor - _DESEMPLEO.antes_de(365).valor
+_IMACEC = bc.SERIES["imacec_12m"].ultimo
+_IPC = bc.SERIES["ipc_mensual"].ultimo
+_IPC_12M = bc.SERIES["ipc_12m"].ultimo
+_DOLAR = bc.SERIES["dolar"]
+_DOLAR_SEMANA = bc.variacion(_DOLAR.ultimo.valor, _DOLAR.antes_de(7).valor)
+_COBRE = bc.SERIES["cobre"]
+_COBRE_SEMANA = bc.variacion(_COBRE.ultimo.valor, _COBRE.antes_de(7).valor)
+_IPEC = bc.SERIES["ipec"].ultimo
+
+
+def _texto_tpm() -> str:
+    actual = bc.tasa(_TPM.ultimo.valor)
+    if abs(_TPM_CAMBIO) < 0.01:
+        hoy = f"La tasa del Banco Central se mantiene en {actual}"
+    else:
+        hoy = f"La tasa del Banco Central {'subió' if _TPM_CAMBIO > 0 else 'bajó'} a {actual}"
+    diferencia = _TPM_ESPERADA - _TPM.ultimo.valor
+    if abs(diferencia) < 0.125:
+        futuro = "los economistas no esperan cambios en el próximo año"
+    else:
+        accion = "suba" if diferencia > 0 else "baje"
+        futuro = f"los economistas esperan que {accion} a {bc.tasa(_TPM_ESPERADA)} en un año"
+    return f"{hoy} y {futuro}."
+
+
+def _texto_actividad() -> str:
+    desempleo = bc.verbo(_DESEMPLEO_12M, 0.1, igual="se mantiene").replace(NBSP + "%", " pp")
+    economia = (
+        f"creció {bc.pct(_IMACEC.valor)}" if _IMACEC.valor >= 0 else f"se contrajo {bc.pct(abs(_IMACEC.valor))}"
+    )
+    return (
+        f"El desempleo llegó a {bc.pct(_DESEMPLEO.ultimo.valor)} ({desempleo} en un año) y la economía "
+        f"{economia} en 12 meses, según el IMACEC de {bc.mes(_IMACEC.fecha)}."
+    )
+
+
+def _texto_dolar() -> str:
+    return (
+        f"El dólar {bc.verbo(_DOLAR_SEMANA, 0.3)} en la semana y el cobre "
+        f"{bc.verbo(_COBRE_SEMANA, 0.5)}."
+    )
+
+
+_IND_TPM, _PRESION_TPM = bc.indicador(
+    "tpm", "Tasa de política monetaria", bc.tasa(_TPM.ultimo.valor),
+    bc.puntos_porcentuales(_TPM_CAMBIO).capitalize() + " en el mes",
+    "La tasa que fija el Banco Central y guía al resto de las tasas. La franja es su rango de los últimos 5 años.",
+)
+_IND_HIPOTECARIA, _ = bc.indicador(
+    "tasa_hipotecaria", "Tasa hipotecaria promedio", f"UF + {bc.tasa(_HIPOTECARIA.ultimo.valor)}",
+    f"{bc.puntos_porcentuales(_HIPOTECARIA.ultimo.valor - _HIPOTECARIA.antes_de(28).valor)} en 4 semanas",
+    "Tasa promedio de los créditos para vivienda en UF a más de 3 años (dato semanal).",
+)
+_IND_DESEMPLEO, _PRESION_DESEMPLEO = bc.indicador(
+    "desempleo", "Tasa de desempleo", bc.pct(_DESEMPLEO.ultimo.valor),
+    f"{bc.puntos_porcentuales(_DESEMPLEO_12M)} en 12 meses",
+    f"Trimestre móvil terminado en {bc.mes(_DESEMPLEO.ultimo.fecha)} (INE).",
+    dato_al=bc.fin_de_mes(_DESEMPLEO.ultimo.fecha),
+)
+_IND_IMACEC, _PRESION_IMACEC = bc.indicador(
+    "imacec_12m", "IMACEC", bc.pct(_IMACEC.valor, signo=True), "en 12 meses",
+    "Crecimiento de la actividad económica respecto del mismo mes del año anterior.",
+    invertida=True, dato_al=bc.fin_de_mes(_IMACEC.fecha),
+)
+_IND_IPC, _PRESION_IPC = bc.indicador(
+    "ipc_mensual", "IPC mensual", bc.pct(_IPC.valor), f"{bc.pct(_IPC_12M.valor)} en 12 meses",
+    f"Variación de los precios al consumidor en {bc.mes(_IPC.fecha)}. La presión se mide con la variación en 12 meses.",
+    serie_presion="ipc_12m", dato_al=bc.fin_de_mes(_IPC.fecha),
+)
+_IND_DOLAR, _PRESION_DOLAR = bc.indicador(
+    "dolar", "Dólar observado", bc.pesos(_DOLAR.ultimo.valor), f"{bc.pct(_DOLAR_SEMANA, signo=True)} semanal",
+    "Tipo de cambio que publica el Banco Central cada día hábil.",
+)
+_IND_COBRE, _ = bc.indicador(
+    "cobre", "Cobre", f"US$ {bc.numero(_COBRE.ultimo.valor, 2)} la libra",
+    f"{bc.pct(_COBRE_SEMANA, signo=True)} semanal",
+    "Precio del cobre refinado en la Bolsa de Metales de Londres. Un cobre alto suele bajar el dólar.",
+    invertida=True,
+)
+_PRESION_ACTIVIDAD = la_mas_alta(_PRESION_DESEMPLEO, _PRESION_IMACEC)
+
+
+def _etiqueta(presion: Presion) -> str:
+    return f"Presión {presion.value}"
+
 TERMOMETROS = [
     Termometro(
         id="bolsillo",
@@ -77,12 +173,12 @@ TERMOMETROS = [
         id="deudas",
         nombre="Deudas",
         pregunta="¿Está más caro endeudarse?",
-        presion=Presion.media,
-        etiqueta_presion="Presión media",
-        tendencia=Tendencia.estable,
-        dato_clave=f"Tasa del Banco Central: 4,5{NBSP}%",
-        frase="La tasa se mantiene y los expertos no esperan cambios este año.",
-        dato_al=date(2026, 10, 14),
+        presion=_PRESION_TPM,
+        etiqueta_presion=_etiqueta(_PRESION_TPM),
+        tendencia=bc.tendencia(_TPM_CAMBIO, 0.01),
+        dato_clave=f"Tasa del Banco Central: {bc.tasa(_TPM.ultimo.valor)}",
+        frase=_texto_tpm(),
+        dato_al=_TPM.ultimo.fecha,
         proxima_actualizacion=date(2026, 10, 28),
         fuentes=["Banco Central", "CMF"],
     ),
@@ -103,12 +199,12 @@ TERMOMETROS = [
         id="actividad",
         nombre="Actividad y empleo",
         pregunta="¿Cómo va la economía en general?",
-        presion=Presion.alta,
-        etiqueta_presion="Presión alta",
-        tendencia=Tendencia.sube,
-        dato_clave=f"Desempleo: 8,7{NBSP}%",
-        frase="El desempleo sigue sobre lo habitual, aunque la actividad crece.",
-        dato_al=date(2026, 8, 31),
+        presion=_PRESION_ACTIVIDAD,
+        etiqueta_presion=_etiqueta(_PRESION_ACTIVIDAD),
+        tendencia=bc.tendencia(_DESEMPLEO_12M, 0.1),
+        dato_clave=f"Desempleo: {bc.pct(_DESEMPLEO.ultimo.valor)}",
+        frase=_texto_actividad(),
+        dato_al=bc.fin_de_mes(_DESEMPLEO.ultimo.fecha),
         proxima_actualizacion=date(2026, 10, 30),
         fuentes=["INE", "Banco Central"],
     ),
@@ -116,13 +212,13 @@ TERMOMETROS = [
         id="dolar",
         nombre="Dólar y mercados",
         pregunta="¿Qué pasa afuera?",
-        presion=Presion.media,
-        etiqueta_presion="Presión media",
-        tendencia=Tendencia.baja,
-        dato_clave="Dólar observado: $935",
-        frase="El dólar bajó por segundo día, ayudado por el alza del cobre.",
-        dato_al=date(2026, 10, 14),
-        proxima_actualizacion=date(2026, 10, 15),
+        presion=_PRESION_DOLAR,
+        etiqueta_presion=_etiqueta(_PRESION_DOLAR),
+        tendencia=bc.tendencia(_DOLAR_SEMANA, 0.3),
+        dato_clave=f"Dólar observado: {bc.pesos(_DOLAR.ultimo.valor)}",
+        frase=_texto_dolar(),
+        dato_al=_DOLAR.ultimo.fecha,
+        proxima_actualizacion=_DOLAR.ultimo.fecha + timedelta(days=3 if _DOLAR.ultimo.fecha.weekday() == 4 else 1),
         fuentes=["Banco Central"],
     ),
     Termometro(
@@ -179,18 +275,7 @@ _DETALLES = {
                 fuente="ODEPA",
                 dato_al=_MARRAQUETA.dato_al,
             ),
-            Indicador(
-                id="ipc",
-                nombre="IPC mensual",
-                valor=f"0,3{NBSP}%",
-                variacion=f"4,1{NBSP}% en 12 meses",
-                presion=Presion.media,
-                descripcion="Variación mensual del índice de precios al consumidor.",
-                serie=_mensual([0.6, 0.4, 0.2, 0.5, 0.3, 0.1, 0.4, 0.3, 0.2, 0.4, 0.5, 0.3], (2026, 9)),
-                banda_normal=BandaNormal(min=0.1, max=0.5),
-                fuente="INE",
-                dato_al=date(2026, 9, 30),
-            ),
+            _IND_IPC,
             Indicador(
                 id="bencina",
                 nombre="Bencina 95",
@@ -205,10 +290,10 @@ _DETALLES = {
             ),
         ],
         percepcion=Percepcion(
-            nombre="Confianza del consumidor (IPEC)",
-            valor="43,6 puntos",
+            nombre="Percepción económica (IPEC)",
+            valor=f"{bc.numero(_IPEC.valor)} puntos en {bc.mes(_IPEC.fecha)}",
             descripcion="Bajo 50 significa más pesimismo que optimismo.",
-            fuente="GfK Chile",
+            fuente="GfK Chile, vía Banco Central",
         ),
         proximas_publicaciones=[
             Publicacion(fecha=date(2026, 10, 16), nombre="Precios de alimentos", fuente="ODEPA"),
@@ -218,35 +303,11 @@ _DETALLES = {
     ),
     "deudas": dict(
         explicacion=(
-            "La tasa de política monetaria lleva meses en 4,5 % y los expertos no esperan cambios "
-            "este año. Los créditos de consumo e hipotecarios siguen caros comparados con antes de 2022."
+            f"{_texto_tpm()} Un crédito de consumo cuesta en promedio "
+            f"{bc.tasa(bc.SERIES['tasa_consumo'].ultimo.valor)} al año y uno hipotecario, "
+            f"UF + {bc.tasa(_HIPOTECARIA.ultimo.valor)}."
         ),
-        indicadores=[
-            Indicador(
-                id="tpm",
-                nombre="Tasa de política monetaria",
-                valor=f"4,5{NBSP}%",
-                variacion="Sin cambio",
-                presion=Presion.media,
-                descripcion="La tasa que fija el Banco Central y guía al resto de las tasas.",
-                serie=_mensual([5.0, 5.0, 4.75, 4.75, 4.75, 4.5, 4.5, 4.5, 4.5, 4.5, 4.5, 4.5], (2026, 10)),
-                banda_normal=BandaNormal(min=2.5, max=5.5),
-                fuente="Banco Central",
-                dato_al=date(2026, 10, 14),
-            ),
-            Indicador(
-                id="hipotecario",
-                nombre="Tasa hipotecaria promedio",
-                valor=f"UF + 4,2{NBSP}%",
-                variacion=f"−0,1{NBSP}% en el mes",
-                presion=Presion.media,
-                descripcion="Tasa promedio de créditos hipotecarios en UF.",
-                serie=_mensual([4.5, 4.4, 4.4, 4.3, 4.3, 4.3, 4.2, 4.3, 4.2, 4.3, 4.3, 4.2], (2026, 9)),
-                banda_normal=BandaNormal(min=3.0, max=4.6),
-                fuente="CMF",
-                dato_al=date(2026, 9, 30),
-            ),
-        ],
+        indicadores=[_IND_TPM, _IND_HIPOTECARIA],
         percepcion=None,
         proximas_publicaciones=[
             Publicacion(fecha=date(2026, 10, 28), nombre="Reunión de política monetaria", fuente="Banco Central"),
@@ -281,36 +342,8 @@ _DETALLES = {
         herramienta_relacionada="Mi AFP",
     ),
     "actividad": dict(
-        explicacion=(
-            "La economía crece a un ritmo moderado, pero el desempleo sigue sobre lo habitual "
-            "de los últimos años, sobre todo en la Región Metropolitana."
-        ),
-        indicadores=[
-            Indicador(
-                id="desempleo",
-                nombre="Tasa de desempleo",
-                valor=f"8,7{NBSP}%",
-                variacion=f"+0,2 pp en 12 meses",
-                presion=Presion.alta,
-                descripcion="Trimestre móvil junio-agosto.",
-                serie=_mensual([8.5, 8.4, 8.3, 8.5, 8.7, 8.8, 8.9, 8.8, 8.7, 8.6, 8.7, 8.7], (2026, 8)),
-                banda_normal=BandaNormal(min=7.0, max=8.5),
-                fuente="INE",
-                dato_al=date(2026, 8, 31),
-            ),
-            Indicador(
-                id="imacec",
-                nombre="IMACEC",
-                valor=f"+2,1{NBSP}%",
-                variacion="anual",
-                presion=Presion.media,
-                descripcion="Crecimiento de la actividad económica respecto del mismo mes del año anterior.",
-                serie=_mensual([1.8, 2.4, 1.2, 2.9, 2.2, 1.5, 2.6, 1.9, 2.3, 1.7, 2.5, 2.1], (2026, 8)),
-                banda_normal=BandaNormal(min=1.0, max=3.5),
-                fuente="Banco Central",
-                dato_al=date(2026, 8, 31),
-            ),
-        ],
+        explicacion=_texto_actividad(),
+        indicadores=[_IND_DESEMPLEO, _IND_IMACEC],
         percepcion=None,
         proximas_publicaciones=[
             Publicacion(fecha=date(2026, 10, 30), nombre="Desempleo julio-septiembre", fuente="INE"),
@@ -319,24 +352,11 @@ _DETALLES = {
         herramienta_relacionada="¿Mi sueldo le ganó a la inflación?",
     ),
     "dolar": dict(
-        explicacion="El dólar bajó en los últimos días, en parte por el alza del precio del cobre.",
-        indicadores=[
-            Indicador(
-                id="dolar",
-                nombre="Dólar observado",
-                valor="$935",
-                variacion=f"−0,8{NBSP}% semanal",
-                presion=Presion.media,
-                descripcion="Tipo de cambio que publica el Banco Central cada día hábil.",
-                serie=_mensual([948, 955, 961, 952, 944, 939, 950, 958, 962, 949, 942, 935], (2026, 10)),
-                banda_normal=BandaNormal(min=880, max=970),
-                fuente="Banco Central",
-                dato_al=date(2026, 10, 14),
-            ),
-        ],
+        explicacion=_texto_dolar() + " Un cobre más caro trae más dólares al país y suele bajar su precio.",
+        indicadores=[_IND_DOLAR, _IND_COBRE],
         percepcion=None,
         proximas_publicaciones=[
-            Publicacion(fecha=date(2026, 10, 15), nombre="Dólar observado", fuente="Banco Central"),
+            Publicacion(fecha=_DOLAR.ultimo.fecha + timedelta(days=3 if _DOLAR.ultimo.fecha.weekday() == 4 else 1), nombre="Dólar observado", fuente="Banco Central"),
         ],
         herramienta_relacionada=None,
     ),

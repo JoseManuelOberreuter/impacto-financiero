@@ -6,6 +6,7 @@ la foto real de ODEPA (ver precios.py) y los termómetros de termometros.py.
 
 from datetime import date
 
+from app.datos_ejemplo import banco_central as bc
 from app.datos_ejemplo.precios import CANASTA, PRODUCTOS, PRODUCTOS_POR_ID
 from app.datos_ejemplo.termometros import TERMOMETROS, termometro_de_ejemplo
 from app.modelos.home import CambioSemana, Home, Resumen
@@ -70,17 +71,34 @@ def _cambio_indicador(termometro: str, indicador: str, nombre: str, detalle: str
 
 def _cambios() -> list[CambioSemana]:
     # Los 3 alimentos que más se movieron más la marraqueta (siempre, por ser el precio
-    # de referencia), y dos indicadores de contexto (de ejemplo).
+    # de referencia), y dos indicadores de contexto del Banco Central.
     otros = [p for p in PRODUCTOS if p.id != "marraqueta"]
     mas_movidos = sorted(otros, key=lambda p: abs(p.variacion_semanal), reverse=True)[:3]
     alimentos = sorted(mas_movidos + [PRODUCTOS_POR_ID["marraqueta"]],
                        key=lambda p: abs(p.variacion_semanal), reverse=True)
+    desempleo = bc.SERIES["desempleo"]
+    desempleo_12m = desempleo.ultimo.valor - desempleo.antes_de(365).valor
+    dolar = bc.SERIES["dolar"]
+    dolar_semana = bc.variacion(dolar.ultimo.valor, dolar.antes_de(7).valor)
     return [_cambio_producto(p) for p in alimentos] + [
-        _cambio_indicador("actividad", "desempleo", "Desempleo", f"Sigue en 8,7{NBSP}%",
-                          Tendencia.estable, Presion.alta),
-        _cambio_indicador("dolar", "dolar", "Dólar", f"−0,8{NBSP}% · $935",
-                          Tendencia.baja, Presion.media),
+        _cambio_indicador("actividad", "desempleo", "Desempleo",
+                          f"{bc.pct(desempleo.ultimo.valor)} · {bc.puntos_porcentuales(desempleo_12m)} en 12 meses",
+                          bc.tendencia(desempleo_12m, 0.1), desempleo.presion()[0]),
+        _cambio_indicador("dolar", "dolar", "Dólar",
+                          f"{bc.pct(dolar_semana, signo=True)} · {bc.pesos(dolar.ultimo.valor)}",
+                          bc.tendencia(dolar_semana, 0.3), dolar.presion()[0]),
     ]
+
+
+def _texto_resumen() -> str:
+    tpm = bc.SERIES["tpm"]
+    dolar = bc.SERIES["dolar"]
+    semana = bc.variacion(dolar.ultimo.valor, dolar.antes_de(7).valor)
+    movimiento = {Tendencia.sube: "subió", Tendencia.baja: "bajó", Tendencia.estable: "se mantuvo"}
+    return (
+        f"La tasa del Banco Central está en {bc.tasa(tpm.ultimo.valor)} y el dólar "
+        f"{movimiento[bc.tendencia(semana, 0.3)]} esta semana, a {bc.pesos(dolar.ultimo.valor)}."
+    )
 
 
 def home_de_ejemplo() -> Home:
@@ -89,7 +107,7 @@ def home_de_ejemplo() -> Home:
         datos_de_ejemplo=True,
         resumen=Resumen(
             titulo="La canasta baja un poco: el pan cae 1 % esta semana.",
-            texto=f"La tasa del Banco Central sigue en 4,5{NBSP}% y el dólar bajó.",
+            texto=_texto_resumen(),
         ),
         canasta=CANASTA,
         cambios=_cambios(),

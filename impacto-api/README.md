@@ -2,7 +2,7 @@
 
 Backend de Impacto Financiero: API (FastAPI) y, más adelante, el worker de ingesta y cálculos. Ver [../docs/arquitectura.md](../docs/arquitectura.md).
 
-> Estado: endpoints de todas las secciones con **datos de ejemplo** (`app/datos_ejemplo/`). Alimentos (ODEPA) y AFP (Superintendencia de Pensiones) vienen de fotos reales generadas con los scripts de `scripts/`. Todavía no hay base de datos ni actualización automática.
+> Estado: endpoints de todas las secciones con **datos de ejemplo** (`app/datos_ejemplo/`). Alimentos (ODEPA), AFP (Superintendencia de Pensiones) y las series del Banco Central vienen de fotos reales generadas con los scripts de `scripts/`. Todavía no hay base de datos ni actualización automática.
 
 ## Requisitos
 
@@ -86,7 +86,13 @@ Superintendencia de Pensiones (valor cuota de los fondos A a E; descarga sola):
 .venv/Scripts/python scripts/snapshot_afp.py 2026 app/datos_ejemplo/afp_snapshot.json
 ```
 
-Banco Central (buscar códigos de serie en el catálogo; usa `BCCH_TOKEN` del `.env`):
+Banco Central (16 series principales, 6 años; usa `BCCH_TOKEN` del `.env`). Para actualizar los datos reales, vuelve a correrlo:
+
+```bash
+.venv/Scripts/python scripts/snapshot_bcch.py app/datos_ejemplo/bcch_snapshot.json
+```
+
+Para buscar otros códigos de serie en el catálogo:
 
 ```bash
 .venv/Scripts/python scripts/catalogo_bcch.py cobre precio
