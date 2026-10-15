@@ -9,8 +9,9 @@ import { Platform } from 'react-native';
 
 export const Colors = {
   light: {
-    text: '#11181C',
-    background: '#F7F8FA',
+    text: '#0B1220',
+    // Fondo de un solo tono azul, un poco más oscuro (propuesta G).
+    background: '#D9E3F2',
     backgroundElement: '#FFFFFF',
     backgroundSelected: '#E6ECF2',
     textSecondary: '#5B636E',
@@ -26,10 +27,17 @@ export const Colors = {
     presionAltaFondo: '#FBE7E1',
     avisoFondo: '#FFF8E1',
     avisoTexto: '#6B4E00',
+    // Vidrio (fallback de Liquid Glass) y luces de fondo.
+    vidrio: 'rgba(255,255,255,0.55)',
+    vidrioSolido: 'rgba(255,255,255,0.88)',
+    vidrioBorde: 'rgba(255,255,255,0.9)',
+    ambiente1: '#5B8FE0',
+    ambiente2: '#3F78D6',
+    ambiente3: '#7FA6E8',
   },
   dark: {
-    text: '#ECEEF0',
-    background: '#0E1114',
+    text: '#F2F4F7',
+    background: '#06080C',
     backgroundElement: '#181C20',
     backgroundSelected: '#243039',
     textSecondary: '#A3ABB5',
@@ -44,6 +52,12 @@ export const Colors = {
     presionAltaFondo: '#3D1E17',
     avisoFondo: '#2E2712',
     avisoTexto: '#F2D58A',
+    vidrio: 'rgba(255,255,255,0.06)',
+    vidrioSolido: 'rgba(28,32,40,0.92)',
+    vidrioBorde: 'rgba(255,255,255,0.12)',
+    ambiente1: '#1D4FA8',
+    ambiente2: '#163E86',
+    ambiente3: '#2A5DB8',
   },
 } as const;
 

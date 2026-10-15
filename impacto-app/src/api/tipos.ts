@@ -1,4 +1,4 @@
-// Tipos de la respuesta de GET /v1/home (impacto-api/app/modelos/home.py).
+// Tipos de las respuestas de impacto-api (app/modelos/*.py).
 // Más adelante se generarán automáticamente desde el OpenAPI del backend.
 
 export type Presion = 'baja' | 'media' | 'alta';
@@ -7,7 +7,6 @@ export type Tendencia = 'sube' | 'baja' | 'estable';
 export type Termometro = {
   id: string;
   nombre: string;
-  icono: string;
   pregunta: string;
   presion: Presion;
   etiqueta_presion: string;
@@ -20,10 +19,133 @@ export type Termometro = {
   fuentes: string[];
 };
 
+export type PuntoSerie = { fecha: string; valor: number };
+
+export type Indicador = {
+  id: string;
+  nombre: string;
+  valor: string;
+  variacion: string | null;
+  presion: Presion;
+  descripcion: string;
+  serie: PuntoSerie[];
+  banda_normal: { min: number; max: number } | null;
+  fuente: string;
+  dato_al: string;
+};
+
+export type Publicacion = { fecha: string; nombre: string; fuente: string };
+
+export type TermometroDetalle = Termometro & {
+  explicacion: string;
+  indicadores: Indicador[];
+  percepcion: { nombre: string; valor: string; descripcion: string; fuente: string } | null;
+  proximas_publicaciones: Publicacion[];
+  metodologia: string;
+  herramienta_relacionada: string | null;
+};
+
+export type PuntoPrecio = { semana: string; precio: number };
+
+export type Producto = {
+  id: string;
+  nombre: string;
+  unidad: string;
+  categoria: string;
+  precio: number;
+  variacion_semanal: number;
+  variacion_anual: number;
+  puntos_de_venta: number;
+  serie: PuntoPrecio[];
+  por_tipo_local: { tipo: string; precio: number }[];
+  por_region: { region: string; precio: number }[];
+  dato_al: string;
+  fuente: string;
+};
+
+export type PrecioReferencia = {
+  id: string;
+  nombre: string;
+  unidad: string;
+  precio: number;
+  fuente: string;
+  nota: string;
+  de_ejemplo: boolean;
+};
+
+export type Canasta = {
+  total: number;
+  variacion_semanal: number;
+  dato_al: string;
+  serie: PuntoPrecio[];
+  composicion: { nombre: string; cantidad: string; costo: number; porcentaje: number }[];
+  nota: string;
+};
+
+export type Precios = {
+  canasta: Canasta;
+  productos: Producto[];
+  energia_y_transporte: PrecioReferencia[];
+};
+
+export type Titular = { titulo: string; medio: string; fecha: string; enlace: string | null };
+
+export type Noticias = {
+  presion: Presion;
+  etiqueta: string;
+  tendencia: Tendencia;
+  tono_semana: number;
+  serie_tono: PuntoSerie[];
+  incertidumbre: number;
+  total_titulares: number;
+  medios: number;
+  temas: {
+    nombre: string;
+    termometro: string;
+    tono: number;
+    cantidad: number;
+    titulares: Titular[];
+  }[];
+  hechos_esenciales: { entidad: string; titulo: string; resumen: string; fecha: string }[];
+  dato_al: string;
+  nota: string;
+};
+
+export type Herramientas = {
+  calculadoras: { id: string; nombre: string; descripcion: string; disponible: boolean }[];
+  mi_afp: {
+    dato_al: string;
+    provisional: boolean;
+    fuente: string;
+    fondos: { fondo: string; afps: { afp: string; anio: number; mes: number }[] }[];
+  };
+  calendario: {
+    fecha: string;
+    nombre: string;
+    fuente: string;
+    termometro: string | null;
+    estimada: boolean;
+  }[];
+  metodologia: { titulo: string; texto: string }[];
+};
+
+export type CambioSemana = {
+  id: string;
+  nombre: string;
+  detalle: string;
+  direccion: Tendencia;
+  presion: Presion;
+  serie: number[];
+  /** Ruta de la app con el detalle (por ejemplo "/precios/papa"). */
+  enlace: string;
+};
+
 export type Home = {
   generado_el: string;
   datos_de_ejemplo: boolean;
   resumen: { titulo: string; texto: string };
+  canasta: Canasta;
+  cambios: CambioSemana[];
   termometros: Termometro[];
   termometros_por_defecto: string[];
   max_termometros_home: number;

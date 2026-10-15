@@ -1,6 +1,8 @@
 import { useSyncExternalStore } from 'react';
 import { useColorScheme as useRNColorScheme } from 'react-native';
 
+import { resolverEsquema, usePreferenciaTema } from '@/hooks/use-preferencia-tema';
+
 const sinSuscripcion = () => () => {};
 
 /**
@@ -15,9 +17,10 @@ export function useColorScheme() {
   );
 
   const colorScheme = useRNColorScheme();
+  const { preferencia } = usePreferenciaTema();
 
   if (hasHydrated) {
-    return colorScheme;
+    return resolverEsquema(preferencia, colorScheme);
   }
 
   return 'light';
