@@ -97,6 +97,7 @@ Cada directorio tiene su README con las instrucciones para correrlo en local.
 | [docs/investigacion-diseno.md](docs/investigacion-diseno.md) | Investigación internacional y chilena de apps económicas y termómetros: fortalezas, debilidades y qué aplicamos |
 | [docs/arquitectura.md](docs/arquitectura.md) | Stack, repositorios, backend, base de datos, app y despliegue |
 | [docs/investigacion-fuentes-ampliadas.md](docs/investigacion-fuentes-ampliadas.md) | Más fuentes chilenas e internacionales, datos propios que salen de cruzarlas y tabla maestra de fuentes |
+| [docs/banco-central-series.md](docs/banco-central-series.md) | Códigos de las series del Banco Central por termómetro, cómo usar su API y datos propios que salen de cruzarlas |
 | [docs/pendientes-backend.md](docs/pendientes-backend.md) | Lista de pendientes del backend: claves, base de datos, conectores, cálculos y noticias |
 
 ## Arquitectura

@@ -36,7 +36,7 @@
 - **Librería:** `bcchapi` (Python).
 - **Condiciones:** se puede reproducir la información citando al Banco Central como dueño de los datos.
 
-**Tarea:** armar el catálogo de códigos de serie que usaremos (UF, dólar, TPM, IPC, IMACEC, desempleo, cobre).
+**Catálogo de códigos:** hecho y verificado con el token el 15-oct-2026, en [banco-central-series.md](banco-central-series.md). Son unas 25.500 series; ahí están las que usamos por termómetro.
 
 ## 2. CMF: API de indicadores
 

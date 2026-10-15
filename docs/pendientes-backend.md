@@ -18,12 +18,12 @@
 
 ## Fase 0: cuentas y claves (las debe pedir el usuario)
 
-- [ ] Token de la **API del Banco Central** (BDE).
+- [x] Token de la **API del Banco Central** (BDE): API Key Token de "Mi Cuenta", vigencia de un año (se puede extender sin cambiarlo). Va en `BCCH_TOKEN`.
 - [ ] `apikey` de la **API de la CMF**.
 - [ ] Token de la **API de la CNE** (`api.cne.cl/register`).
 - [ ] Credenciales de la **API del Coordinador Eléctrico** (nuevo).
 - [ ] Ticket de **Mercado Público** (con Clave Única; nuevo, opcional).
-- [ ] Claves gratuitas de **FRED** y **EIA** (nuevo, opcional: primero revisar si la BDE ya tiene esas series).
+- [ ] Claves gratuitas de **FRED** y **EIA**: probablemente innecesarias, porque la BDE ya trae el cobre, el WTI, el Brent, el diésel y la bencina de EE. UU. ([banco-central-series.md](banco-central-series.md)).
 - [ ] Clave de la API de un modelo de lenguaje para clasificar noticias. Recomendación: Claude Haiku, por costo.
 - [ ] Cuentas de **Supabase**, **Railway** y **Expo/EAS**.
 - [ ] Suscribirse a las alertas de **hechos esenciales** de la CMF.
@@ -48,7 +48,7 @@
 
 | Prioridad | Conector | Frecuencia | Nota |
 |---|---|---|---|
-| 1 | Banco Central (BDE) | Diaria + calendario de publicaciones | Armar primero el **catálogo de códigos de serie**: UF, dólar, TPM, IPC, IMACEC, cobre, desempleo, EEE, IPV y series internacionales |
+| 1 | Banco Central (BDE) | Diaria + calendario de publicaciones | Catálogo de códigos listo en [banco-central-series.md](banco-central-series.md); buscar más con `scripts/catalogo_bcch.py` |
 | 1 | ODEPA | Semanal (viernes) | Convertir `snapshot_odepa.py` en conector |
 | 1 | Superintendencia de Pensiones (valor cuota) | Diaria | Convertir `snapshot_afp.py`; reprocesar los datos provisionales cuando se confirmen |
 | 1 | CMF (TMC, tasas, UTM) | Diaria / mensual | |
