@@ -4,13 +4,35 @@
     {
       "name": "impacto-api",
       "runtimeExecutable": "impacto-api/.venv/Scripts/python.exe",
-      "runtimeArgs": ["-m", "uvicorn", "app.main:app", "--port", "8000", "--app-dir", "impacto-api", "--reload", "--reload-dir", "impacto-api/app"],
-      "port": 8000
+      "runtimeArgs": [
+        "-m",
+        "uvicorn",
+        "app.main:app",
+        "--port",
+        "8000",
+        "--app-dir",
+        "impacto-api",
+        "--reload",
+        "--reload-dir",
+        "impacto-api/app"
+      ],
+      "port": 8000,
+      "env": {
+        "CACHE_SEGUNDOS": "0"
+      }
     },
     {
       "name": "impacto-app-web",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["--prefix", "impacto-app", "run", "web", "--", "--port", "8081"],
+      "runtimeArgs": [
+        "--prefix",
+        "impacto-app",
+        "run",
+        "web",
+        "--",
+        "--port",
+        "8081"
+      ],
       "port": 8081
     }
   ]
