@@ -1,100 +1,86 @@
 """Datos de ejemplo del home.
 
-Se usan mientras los conectores no estén listos. Las cifras son ilustrativas:
-los precios de alimentos se inspiran en ODEPA (semana al 9-oct-2026) y el resto
-son valores de ejemplo, no datos oficiales.
+Reúne lo que muestran las demás secciones: la canasta y los productos salen de
+la foto real de ODEPA (ver precios.py) y los termómetros de termometros.py.
 """
 
 from datetime import date
 
-from app.modelos.home import Home, Presion, Resumen, Tendencia, Termometro
+from app.datos_ejemplo.precios import CANASTA, PRODUCTOS, PRODUCTOS_POR_ID
+from app.datos_ejemplo.termometros import TERMOMETROS, termometro_de_ejemplo
+from app.modelos.home import CambioSemana, Home, Resumen
+from app.modelos.precios import Producto
+from app.modelos.termometros import Presion, Tendencia
 
-TERMOMETROS = [
-    Termometro(
-        id="bolsillo",
-        nombre="Bolsillo",
-        icono="🛒",
-        pregunta="¿Está más cara la vida?",
-        presion=Presion.media,
-        etiqueta_presion="Presión media",
-        tendencia=Tendencia.sube,
-        dato_clave="Canasta semanal: $125.600 (+0,7\u00a0%)",
-        frase="Subieron el pan y la bencina; bajó un poco el pollo.",
-        dato_al=date(2026, 10, 9),
-        proxima_actualizacion=date(2026, 10, 16),
-        fuentes=["ODEPA", "CNE", "Panel de Expertos"],
-    ),
-    Termometro(
-        id="deudas",
-        nombre="Deudas",
-        icono="🏦",
-        pregunta="¿Está más caro endeudarse?",
-        presion=Presion.media,
-        etiqueta_presion="Presión media",
-        tendencia=Tendencia.estable,
-        dato_clave="Tasa del Banco Central: 4,5\u00a0%",
-        frase="La tasa se mantiene y los expertos no esperan cambios este año.",
-        dato_al=date(2026, 10, 14),
-        proxima_actualizacion=date(2026, 10, 28),
-        fuentes=["Banco Central", "CMF"],
-    ),
-    Termometro(
-        id="ahorro",
-        nombre="Ahorro y pensiones",
-        icono="💰",
-        pregunta="¿Cómo le va a mi plata?",
-        presion=Presion.baja,
-        etiqueta_presion="Presión baja",
-        tendencia=Tendencia.sube,
-        dato_clave="Fondo C: +0,4\u00a0% en el mes",
-        frase="Los fondos subieron en el mes, liderados por los más riesgosos.",
-        dato_al=date(2026, 10, 13),
-        proxima_actualizacion=date(2026, 10, 16),
-        fuentes=["Superintendencia de Pensiones"],
-    ),
-    Termometro(
-        id="actividad",
-        nombre="Actividad y empleo",
-        icono="🏭",
-        pregunta="¿Cómo va la economía en general?",
-        presion=Presion.alta,
-        etiqueta_presion="Presión alta",
-        tendencia=Tendencia.sube,
-        dato_clave="Desempleo: 8,7\u00a0%",
-        frase="El desempleo sigue sobre lo habitual, aunque la actividad crece.",
-        dato_al=date(2026, 8, 31),
-        proxima_actualizacion=date(2026, 10, 30),
-        fuentes=["INE", "Banco Central"],
-    ),
-    Termometro(
-        id="dolar",
-        nombre="Dólar y mercados",
-        icono="💵",
-        pregunta="¿Qué pasa afuera?",
-        presion=Presion.media,
-        etiqueta_presion="Presión media",
-        tendencia=Tendencia.baja,
-        dato_clave="Dólar observado: $935",
-        frase="El dólar bajó por segundo día, ayudado por el alza del cobre.",
-        dato_al=date(2026, 10, 14),
-        proxima_actualizacion=date(2026, 10, 15),
-        fuentes=["Banco Central"],
-    ),
-    Termometro(
-        id="animo",
-        nombre="Ánimo",
-        icono="📰",
-        pregunta="¿De qué se está hablando?",
-        presion=Presion.alta,
-        etiqueta_presion="Más negativo que lo habitual",
-        tendencia=Tendencia.baja,
-        dato_clave="412 titulares de 6 medios",
-        frase="Dominaron el desempleo y el precio de la bencina.",
-        dato_al=date(2026, 10, 14),
-        proxima_actualizacion=date(2026, 10, 15),
-        fuentes=["La Tercera", "BioBio", "Cooperativa", "CIPER", "Ex-Ante", "CMF"],
-    ),
-]
+NBSP = "\u00a0"
+# Cómo se lee el precio según la unidad del producto ("$1.596 el kilo").
+_ARTICULO_UNIDAD = {
+    "kilo": "el kilo",
+    "litro": "el litro",
+    "bandeja de 30": "la bandeja",
+    "botella 900 ml": "la botella",
+}
+# Bajo este cambio porcentual se considera que el precio se mantuvo.
+_UMBRAL_ESTABLE = 0.5
+
+
+def _pesos(valor: float) -> str:
+    return "$" + f"{round(valor):,}".replace(",", ".")
+
+
+def _pct(valor: float) -> str:
+    signo = "+" if valor > 0 else "−" if valor < 0 else ""
+    return f"{signo}{abs(valor):.1f}".replace(".", ",") + f"{NBSP}%"
+
+
+def _cambio_producto(p: Producto) -> CambioSemana:
+    if abs(p.variacion_semanal) < _UMBRAL_ESTABLE:
+        direccion, presion = Tendencia.estable, Presion.media
+    elif p.variacion_semanal > 0:
+        # Un alimento más caro presiona el bolsillo.
+        direccion, presion = Tendencia.sube, Presion.alta
+    else:
+        direccion, presion = Tendencia.baja, Presion.baja
+    unidad = _ARTICULO_UNIDAD.get(p.unidad, p.unidad)
+    return CambioSemana(
+        id=p.id,
+        nombre=p.nombre,
+        detalle=f"{_pct(p.variacion_semanal)} · {_pesos(p.precio)} {unidad}",
+        direccion=direccion,
+        presion=presion,
+        serie=[punto.precio for punto in p.serie],
+        enlace=f"/precios/{p.id}",
+    )
+
+
+def _cambio_indicador(termometro: str, indicador: str, nombre: str, detalle: str,
+                      direccion: Tendencia, presion: Presion) -> CambioSemana:
+    detalle_termometro = termometro_de_ejemplo(termometro)
+    serie = next(i.serie for i in detalle_termometro.indicadores if i.id == indicador)
+    return CambioSemana(
+        id=indicador,
+        nombre=nombre,
+        detalle=detalle,
+        direccion=direccion,
+        presion=presion,
+        serie=[p.valor for p in serie],
+        enlace=f"/termometros/{termometro}",
+    )
+
+
+def _cambios() -> list[CambioSemana]:
+    # Los 3 alimentos que más se movieron más la marraqueta (siempre, por ser el precio
+    # de referencia), y dos indicadores de contexto (de ejemplo).
+    otros = [p for p in PRODUCTOS if p.id != "marraqueta"]
+    mas_movidos = sorted(otros, key=lambda p: abs(p.variacion_semanal), reverse=True)[:3]
+    alimentos = sorted(mas_movidos + [PRODUCTOS_POR_ID["marraqueta"]],
+                       key=lambda p: abs(p.variacion_semanal), reverse=True)
+    return [_cambio_producto(p) for p in alimentos] + [
+        _cambio_indicador("actividad", "desempleo", "Desempleo", f"Sigue en 8,7{NBSP}%",
+                          Tendencia.estable, Presion.alta),
+        _cambio_indicador("dolar", "dolar", "Dólar", f"−0,8{NBSP}% · $935",
+                          Tendencia.baja, Presion.media),
+    ]
 
 
 def home_de_ejemplo() -> Home:
@@ -102,12 +88,11 @@ def home_de_ejemplo() -> Home:
         generado_el=date(2026, 10, 15),
         datos_de_ejemplo=True,
         resumen=Resumen(
-            titulo="Hoy en Chile",
-            texto=(
-                "La canasta subió levemente por el pan y la bencina. "
-                "La tasa del Banco Central sigue igual y el dólar bajó."
-            ),
+            titulo="La canasta baja un poco: el pan cae 1 % esta semana.",
+            texto=f"La tasa del Banco Central sigue en 4,5{NBSP}% y el dólar bajó.",
         ),
+        canasta=CANASTA,
+        cambios=_cambios(),
         termometros=TERMOMETROS,
         termometros_por_defecto=["bolsillo", "deudas", "ahorro", "actividad"],
         max_termometros_home=4,

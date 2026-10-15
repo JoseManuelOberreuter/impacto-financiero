@@ -20,3 +20,11 @@ def test_home_entrega_termometros_por_defecto_validos():
     assert set(datos["termometros_por_defecto"]) <= ids
     assert len(datos["termometros_por_defecto"]) <= datos["max_termometros_home"]
     assert datos["datos_de_ejemplo"] is True
+
+
+def test_cambios_enlazan_a_su_detalle_y_tienen_serie():
+    cambios = cliente.get("/v1/home").json()["cambios"]
+    assert len(cambios) == 6
+    for cambio in cambios:
+        assert len(cambio["serie"]) >= 2
+        assert cliente.get("/v1" + cambio["enlace"]).status_code == 200
