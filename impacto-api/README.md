@@ -45,6 +45,8 @@ En macOS o Linux, usar `.venv/bin/python` en vez de `.venv/Scripts/python`.
 | `PORT` | Puerto (lo define Railway) | `8000` |
 | `CACHE_SEGUNDOS` | Segundos que el navegador puede guardar la respuesta (usar `0` en desarrollo) | `300` |
 
+Las claves de las fuentes (Banco Central, CMF, CNE y otras) van en un archivo `.env`, que no se sube a GitHub. Copia [.env.example](.env.example) como `.env` y completa las que tengas.
+
 ## Docker
 
 ```bash
@@ -83,3 +85,11 @@ Superintendencia de Pensiones (valor cuota de los fondos A a E; descarga sola):
 ```bash
 .venv/Scripts/python scripts/snapshot_afp.py 2026 app/datos_ejemplo/afp_snapshot.json
 ```
+
+Banco Central (buscar códigos de serie en el catálogo; usa `BCCH_TOKEN` del `.env`):
+
+```bash
+.venv/Scripts/python scripts/catalogo_bcch.py cobre precio
+```
+
+Los códigos elegidos por termómetro están en [docs/banco-central-series.md](../docs/banco-central-series.md).
