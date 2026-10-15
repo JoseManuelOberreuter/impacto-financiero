@@ -38,6 +38,77 @@ El onboarding explica en pocas pantallas cómo funciona la app y deja al usuario
 - Los termómetros no elegidos **siguen disponibles** en el menú; solo no aparecen en el home.
 - **Sin login en la etapa 1:** las preferencias se guardan en el navegador del usuario. Si cambia de dispositivo o borra datos, vuelve al home por defecto. Cuando haya cuentas (etapa 2), las preferencias se sincronizan.
 
+## Inicio actual (propuesta G, 15-oct-2026)
+
+Se eligió la **propuesta G** entre 7 diseños hechos en Figma ([Impacto Financiero — Inicio (propuestas)](https://www.figma.com/design/WRgfk96kZ7FSh4UNc0TFuC)), con los termómetros en tarjetas tal como los ajustó el usuario:
+
+```
+Impacto                               Jueves 15 de octubre   ← fecha arriba a la derecha
+
+Hoy en Chile
+La canasta baja un poco: el pan cae 1 % esta semana.         ← titular grande
+La tasa del Banco Central sigue en 4,5 % y el dólar bajó.    ← bajada
+
+┌ vidrio ─────────────────────────────────────────┐
+│ Canasta semanal                                 │
+│ $126.626                    ~~ mini gráfico ~~  │
+│ −0,2 %                                          │
+└─────────────────────────────────────────────────┘
+
+Lo que cambió esta semana
+┌ vidrio ─────────────────────────────────────────┐
+│ ↗ Papa         +4,2 % · $1.596 el kilo   ~~~~~  │
+│ ↗ Huevos       +3,0 % · $6.175 la bandeja ~~~~  │
+│ ↘ Aceite       −3,0 % · $2.218 la botella ~~~~  │
+│ ↘ Marraqueta   −1,0 % · $2.203 el kilo   ~~~~~  │
+│ — Desempleo    Sigue en 8,7 %            ~~~~~  │
+│ ↘ Dólar        −0,8 % · $935             ~~~~~  │
+└─────────────────────────────────────────────────┘
+
+Termómetros
+[Bolsillo  Presión Media ↘] [Deudas     Presión Media —]
+[Ahorro    Presión Media —] [Actividad  Presión Alta  ↗]
+```
+
+- **Lo que más le gustó al usuario:** el titular grande, que haya gráficos y las flechas de "lo que cambió".
+- **"Lo que cambió esta semana"** (`cambios` en `GET /v1/home`): los 3 alimentos que más se movieron, más la marraqueta siempre (por ser el precio de referencia), más desempleo y dólar.
+  - **Color:** según la presión sobre el bolsillo. Un alimento que sube = alta; uno que baja = baja; un cambio menor a 0,5 % = estable.
+  - **Enlace:** cada fila lleva a su detalle.
+- **Descartados:** el panel de presión como protagonista (B) y el carrusel tipo historias (D).
+- **Mi AFP** no está en el Inicio por ahora, para no sobrecargarlo.
+
+### Estilo visual
+
+- **Minimalista y moderno**, inspirado en el **Liquid Glass** de iOS 26: superficies de vidrio sobre un fondo con luces difusas.
+- **Fondo de un solo tono azul**, un poco más oscuro (`#D9E3F2` en modo claro), igual en todas las pestañas.
+- En **iPhone con iOS 26** se usa el vidrio nativo (`expo-glass-effect`). En **web** se imita con desenfoque (`backdrop-filter`). En el resto de las plataformas se usa una superficie translúcida.
+- **Tipografía grande** para el titular y el precio; textos secundarios en gris.
+- **Íconos de Lucide** con el color del nivel de presión. Nunca emojis.
+
+## Navegación y páginas (15-oct-2026)
+
+**Menú de 5 secciones:**
+- **iPhone y Android:** barra de pestañas nativa abajo (`NativeTabs` de Expo Router). En iOS 26 usa Liquid Glass. Los íconos son SF Symbols en iOS y Material Symbols en Android.
+- **Web en escritorio:** barra de vidrio arriba, con la marca a la izquierda.
+- **Web en pantallas angostas:** barra de vidrio abajo, igual que en el celular.
+
+| Sección | Ruta | Contenido |
+|---|---|---|
+| Inicio | `/` | Minimalista: titular del día, marraqueta con canasta y termómetros compactos |
+| Termómetros | `/termometros` | Los 6 termómetros con nivel, dato clave y frase |
+| ↳ Detalle | `/termometros/[id]` | Explicación, indicadores con gráfico y banda de "lo normal", percepción, próximas publicaciones, herramienta relacionada y metodología |
+| Precios | `/precios` | Canasta (total, evolución y en qué se va), productos por categoría, energía y transporte |
+| ↳ Detalle | `/precios/[id]` | Precio, 12 semanas, dónde se compra (tipo de local) y comparación por región |
+| Noticias | `/noticias` | Ánimo de la semana (tono, incertidumbre), temas que dominan con titulares, hechos esenciales |
+| Herramientas | `/herramientas` | Mi AFP (rentabilidad por fondo y AFP), calculadoras (pronto), calendario económico, metodología y Ajustes (apariencia: automático, claro u oscuro) |
+
+**Datos reales y de ejemplo en estas páginas:**
+- **Reales**, como foto fija:
+  - Precios de alimentos de ODEPA (semana al 9-oct-2026). Se generan con `impacto-api/scripts/snapshot_odepa.py`.
+  - Rentabilidad de las AFP, provisional al 13-oct-2026. Se genera con `impacto-api/scripts/snapshot_afp.py`.
+  - Tarifa del Metro.
+- **De ejemplo:** IPC, TPM, desempleo, IMACEC, dólar, bencina, gas, tono de las noticias y titulares. Los titulares no se atribuyen a medios reales.
+
 ## Tres niveles de profundidad
 
 ```
@@ -88,6 +159,8 @@ Ver [investigacion-diseno.md](investigacion-diseno.md). Los más relevantes para
 
 ## Decisiones tomadas
 
+- ✅ **La personalización espera a la base de datos (15-oct-2026):** el primer home muestra solo los 4 termómetros por defecto. Elegir y ordenar termómetros se implementa cuando se puedan guardar las preferencias.
+- ✅ **Íconos de librería, nunca emojis:** se usa [Lucide](https://lucide.dev), que permite configurar el color y el tamaño.
 - ✅ El usuario elige y ordena sus termómetros en el onboarding, y puede cambiarlos después.
 - ✅ Se habla de "presión", no de "bueno o malo".
 - ❌ **Sin puntaje global** de la economía (tipo "6,2/10"): es demasiado opinable.

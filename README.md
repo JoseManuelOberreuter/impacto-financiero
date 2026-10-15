@@ -71,10 +71,20 @@ Además de mostrar datos oficiales, calculamos indicadores propios a partir de e
 
 | Directorio | Qué es | Estado |
 |---|---|---|
-| [impacto-app/](impacto-app/) | App para iPhone, Android y web (Expo + Expo Router) | Home con datos de ejemplo |
-| [impacto-api/](impacto-api/) | Backend: API (FastAPI) y, más adelante, el worker | `GET /v1/home` con datos de ejemplo |
+| [impacto-app/](impacto-app/) | App para iPhone, Android y web (Expo + Expo Router) | 5 secciones con menú y páginas de detalle |
+| [impacto-api/](impacto-api/) | Backend: API (FastAPI) y, más adelante, el worker | Endpoints de todas las secciones; ODEPA y AFP con fotos reales |
 
 Cada directorio tiene su README con las instrucciones para correrlo en local.
+
+**Iniciar todo de una vez (Windows):** desde la raíz del proyecto, ejecuta:
+
+```
+.\iniciar.cmd
+```
+
+- Abre la API en una ventana nueva (`http://localhost:8000`) y deja la app web en la terminal actual (`http://localhost:8081`).
+- La primera vez instala lo que falte: el entorno de Python y las dependencias de Node.
+- Para detener todo, presiona `Ctrl + C` en cada ventana.
 
 ## Documentación
 
