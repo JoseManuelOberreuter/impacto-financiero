@@ -132,10 +132,38 @@ const PALETAS = {
       ambiente3: '#806A4B',
     },
   },
+  // Azul grisáceo: serio y financiero, sin el azul típico de banco.
+  pizarra: {
+    light: {
+      ...COMUN_CLARO,
+      text: '#111723',
+      background: '#E8ECF2',
+      backgroundSelected: '#DAE0EA',
+      textSecondary: '#56607A',
+      border: '#D7DDE8',
+      ambiente1: '#7D8FB0',
+      ambiente2: '#5D7096',
+      ambiente3: '#98A8C4',
+    },
+    dark: {
+      ...COMUN_OSCURO,
+      text: '#EEF1F6',
+      background: '#0A0E16',
+      backgroundElement: '#151B27',
+      backgroundSelected: '#212A3B',
+      textSecondary: '#A3ADC2',
+      border: '#263045',
+      presionBajaFondo: '#16342B',
+      vidrioSolido: 'rgba(21,27,39,0.92)',
+      ambiente1: '#22355A',
+      ambiente2: '#1A2946',
+      ambiente3: '#2E4470',
+    },
+  },
 } as const;
 
 // Paleta activa: cambiar aquí para comparar fondos.
-export const Colors = PALETAS.piedraCalida;
+export const Colors = PALETAS.pizarra;
 
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 
