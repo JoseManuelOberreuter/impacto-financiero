@@ -57,12 +57,13 @@ La tasa del Banco Central sigue en 4,5 % y el dólar bajó.    ← bajada
 
 Lo que cambió esta semana
 ┌ vidrio ─────────────────────────────────────────┐
+│ ↘ Bencina 95   $1.559 el litro · −2,2 %  ~~~~~  │
+│ ↘ Gas 15 kg    $31.530 · −3,3 %          ~~~~~  │
 │ ↗ Papa         +4,2 % · $1.596 el kilo   ~~~~~  │
-│ ↗ Huevos       +3,0 % · $6.175 la bandeja ~~~~  │
-│ ↘ Aceite       −3,0 % · $2.218 la botella ~~~~  │
-│ ↘ Marraqueta   −1,0 % · $2.203 el kilo   ~~~~~  │
-│ — Desempleo    Sigue en 8,7 %            ~~~~~  │
-│ ↘ Dólar        −0,8 % · $935             ~~~~~  │
+│ ↗ Petróleo     US$ 101,9 · +7,3 %        ~~~~~  │
+│ ↗ Desempleo    9,6 % · +1,1 pp           ~~~~~  │
+│ ↗ IMACEC       −1,0 % en 12 meses        ~~~~~  │
+│ — Dólar        $984 · +0,3 %             ~~~~~  │
 └─────────────────────────────────────────────────┘
 
 Termómetros
@@ -71,7 +72,12 @@ Termómetros
 ```
 
 - **Lo que más le gustó al usuario:** el titular grande, que haya gráficos y las flechas de "lo que cambió".
-- **"Lo que cambió esta semana"** (`cambios` en `GET /v1/home`): los 3 alimentos que más se movieron, más la marraqueta siempre (por ser el precio de referencia), más desempleo y dólar.
+- **"Lo que cambió esta semana"** (`cambios` en `GET /v1/home`), desde el 16-oct-2026: **todos los datos compiten** y se muestran los que más presionan. Código: `_candidatos` y `_cambios` en `impacto-api/app/datos_ejemplo/home.py`.
+  - **Candidatos (15):** bencina 95, gas licuado 15 kg, el alimento que más se movió en la semana, dólar, cobre, petróleo WTI, UF, tasa máxima de los créditos, TPM, tasa hipotecaria, IPC, desempleo, IMACEC, percepción de las personas (IPEC) y confianza de las empresas (IMCE).
+  - **Orden:** presión alta primero, después media y baja. En cada nivel, los que se movieron van antes que los estables.
+  - **Límites:** hasta 7 filas, máximo 2 por tema (energía, alimentos, afuera, deudas, precios, empleo, ánimo) y un solo alimento, porque la canasta ya los resume.
+  - **Datos mensuales** (IPC, desempleo, IMACEC, IPEC, IMCE): entran solo con presión alta. **Pendiente:** que entren también la semana en que se publican, cuando guardemos la fecha de publicación de cada dato.
+  - **Bencina:** se compara con el último mes con dato de la CNE hasta guardar el precio diario.
   - **Color:** según la presión sobre el bolsillo. Un alimento que sube = alta; uno que baja = baja; un cambio menor a 0,5 % = estable.
   - **Enlace:** cada fila lleva a su detalle.
 - **Descartados:** el panel de presión como protagonista (B) y el carrusel tipo historias (D).
