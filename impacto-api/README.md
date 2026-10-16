@@ -2,7 +2,7 @@
 
 Backend de Impacto Financiero: API (FastAPI) y, más adelante, el worker de ingesta y cálculos. Ver [../docs/arquitectura.md](../docs/arquitectura.md).
 
-> Estado: endpoints de todas las secciones con **datos de ejemplo** (`app/datos_ejemplo/`). Alimentos (ODEPA), AFP (Superintendencia de Pensiones) y las series del Banco Central vienen de fotos reales generadas con los scripts de `scripts/`. Todavía no hay base de datos ni actualización automática.
+> Estado: endpoints de todas las secciones con **datos de ejemplo** (`app/datos_ejemplo/`). Alimentos (ODEPA), AFP (Superintendencia de Pensiones), las series del Banco Central y la bencina y el gas (CNE) vienen de fotos reales generadas con los scripts de `scripts/`. Todavía no hay base de datos ni actualización automática.
 
 ## Requisitos
 
@@ -90,6 +90,12 @@ Banco Central (16 series principales, 6 años; usa `BCCH_TOKEN` del `.env`). Par
 
 ```bash
 .venv/Scripts/python scripts/snapshot_bcch.py app/datos_ejemplo/bcch_snapshot.json
+```
+
+CNE (precio de hoy de la bencina por región e historia mensual de combustibles y gas; usa `CNE_EMAIL` y `CNE_PASSWORD` del `.env`):
+
+```bash
+.venv/Scripts/python scripts/snapshot_cne.py app/datos_ejemplo/cne_snapshot.json
 ```
 
 Para buscar otros códigos de serie en el catálogo:

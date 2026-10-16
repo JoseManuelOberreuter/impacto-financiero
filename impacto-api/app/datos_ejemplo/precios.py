@@ -1,14 +1,15 @@
 """Precios de ejemplo.
 
 Los alimentos vienen de una foto real de ODEPA (odepa_snapshot.json, generada con
-scripts/snapshot_odepa.py). Combustibles, gas y transporte son valores de
-ejemplo hasta conectar la API de la CNE.
+scripts/snapshot_odepa.py). La bencina y el gas vienen de la foto real de la CNE
+(cne.py). El pasaje de Metro es la tarifa vigente, cargada a mano.
 """
 
 import json
 from datetime import date
 from pathlib import Path
 
+from app.datos_ejemplo import cne
 from app.modelos.precios import (
     Canasta,
     ItemCanasta,
@@ -23,24 +24,32 @@ _SNAPSHOT = json.loads((Path(__file__).parent / "odepa_snapshot.json").read_text
 PRODUCTOS = [Producto(**p, fuente=_SNAPSHOT["fuente"]) for p in _SNAPSHOT["productos"]]
 PRODUCTOS_POR_ID = {p.id: p for p in PRODUCTOS}
 
+_BENCINA = cne.hoy("bencina95")
+_GAS_FECHA, _GAS_PRECIO = cne.mensual("glp15_corriente")[-1]
+_MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto",
+          "septiembre", "octubre", "noviembre", "diciembre"]
+
 ENERGIA_Y_TRANSPORTE = [
     PrecioReferencia(
         id="bencina95",
         nombre="Bencina 95",
         unidad="litro",
-        precio=1312,
+        precio=round(_BENCINA["mediana"]),
         fuente="CNE",
-        nota="Promedio de estaciones de la Región Metropolitana.",
-        de_ejemplo=True,
+        nota=(
+            f"Mediana de {_BENCINA['estaciones_frescas']} estaciones de la Región Metropolitana "
+            f"que actualizaron su precio en los últimos {_BENCINA['dias_fresco']} días."
+        ),
+        de_ejemplo=False,
     ),
     PrecioReferencia(
         id="gas15",
         nombre="Gas licuado",
         unidad="cilindro 15 kg",
-        precio=22990,
+        precio=int(round(_GAS_PRECIO, -1)),
         fuente="CNE",
-        nota="Promedio de distribuidores de la Región Metropolitana.",
-        de_ejemplo=True,
+        nota=f"Precio promedio de {_MESES[_GAS_FECHA.month - 1]} en la Región Metropolitana, cilindro corriente.",
+        de_ejemplo=False,
     ),
     PrecioReferencia(
         id="metro",
@@ -105,7 +114,7 @@ def _canasta() -> Canasta:
         composicion=sorted(composicion, key=lambda item: item.costo, reverse=True),
         nota=(
             "Indicador propio de referencia, no es el IPC. Alimentos: ODEPA. "
-            "Bencina y gas: valores de ejemplo fijos hasta conectar la CNE."
+            "Bencina y gas: CNE, con el precio de hoy en todas las semanas hasta guardar su historia semanal."
         ),
     )
 

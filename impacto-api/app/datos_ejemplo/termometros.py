@@ -3,7 +3,8 @@
 Bolsillo y Ahorro usan las fotos reales de ODEPA y de la Superintendencia de
 Pensiones. IPC, TPM, tasa hipotecaria, desempleo, IMACEC, dólar, cobre e IPEC
 vienen de la foto real del Banco Central (banco_central.py), con la presión
-calculada sobre 5 años. La bencina y el tono de las noticias siguen de ejemplo.
+calculada sobre 5 años. La bencina viene de la foto real de la CNE (cne.py).
+El tono de las noticias sigue de ejemplo.
 """
 
 import json
@@ -11,8 +12,9 @@ import statistics
 from datetime import date, timedelta
 from pathlib import Path
 
-from app.calculos.presion import la_mas_alta
+from app.calculos.presion import evaluar, la_mas_alta
 from app.datos_ejemplo import banco_central as bc
+from app.datos_ejemplo import cne
 from app.datos_ejemplo.precios import CANASTA, PRODUCTOS_POR_ID
 from app.modelos.termometros import (
     BandaNormal,
@@ -149,6 +151,39 @@ _IND_COBRE, _ = bc.indicador(
     "Precio del cobre refinado en la Bolsa de Metales de Londres. Un cobre alto suele bajar el dólar.",
     invertida=True,
 )
+# --- Bencina: foto real de la CNE ---
+
+_BENCINA_HOY = cne.hoy("bencina95")
+_BENCINA_MES = cne.mensual("bencina95")
+_BENCINA_ULTIMO_MES = _BENCINA_MES[-1]
+_PRESION_BENCINA, _BANDA_BENCINA = evaluar(
+    _BENCINA_HOY["mediana"],
+    [v for f, v in _BENCINA_MES if f > cne.DESCARGADO_EL.replace(year=cne.DESCARGADO_EL.year - 5)],
+)
+_IND_BENCINA = Indicador(
+    id="bencina",
+    nombre="Bencina 95",
+    valor=f"{_pesos(_BENCINA_HOY['mediana'])} / litro",
+    variacion=(
+        f"{_pct(bc.variacion(_BENCINA_HOY['mediana'], _BENCINA_ULTIMO_MES[1]))} frente a "
+        f"{bc.mes(_BENCINA_ULTIMO_MES[0])}"
+    ),
+    presion=_PRESION_BENCINA,
+    descripcion=(
+        f"Hoy: mediana de {_BENCINA_HOY['estaciones_frescas']} estaciones de Santiago con precio actualizado "
+        "en la última semana. El gráfico muestra el promedio mensual de la Región Metropolitana."
+    ),
+    serie=[PuntoSerie(fecha=f, valor=v) for f, v in _BENCINA_MES if f > cne.DESCARGADO_EL - timedelta(days=365)]
+    + [PuntoSerie(fecha=cne.DESCARGADO_EL, valor=_BENCINA_HOY["mediana"])],
+    banda_normal=_BANDA_BENCINA,
+    fuente="CNE",
+    dato_al=cne.DESCARGADO_EL,
+)
+_PCT_ENERGIA = round(
+    sum(i.porcentaje for i in CANASTA.composicion if "bencina" in i.nombre or "gas" in i.nombre)
+)
+
+_PRESION_BOLSILLO = la_mas_alta(_PRESION_IPC, _PRESION_BENCINA)
 _PRESION_ACTIVIDAD = la_mas_alta(_PRESION_DESEMPLEO, _PRESION_IMACEC)
 
 
@@ -160,8 +195,8 @@ TERMOMETROS = [
         id="bolsillo",
         nombre="Bolsillo",
         pregunta="¿Está más cara la vida?",
-        presion=Presion.media,
-        etiqueta_presion="Presión media",
+        presion=_PRESION_BOLSILLO,
+        etiqueta_presion=_etiqueta(_PRESION_BOLSILLO),
         tendencia=Tendencia.baja,
         dato_clave=f"Canasta semanal: {_pesos(CANASTA.total)} ({_pct(CANASTA.variacion_semanal)})",
         frase="Bajaron el pan, el pollo y el aceite; subieron los huevos.",
@@ -248,7 +283,8 @@ _DETALLES = {
         explicacion=(
             "La canasta semanal bajó levemente porque los alimentos se abarataron: el pan "
             f"cayó {_pct(abs(_MARRAQUETA.variacion_semanal)).lstrip('+')} y también bajaron el pollo y el aceite. "
-            "La bencina y el gas se mantienen altos y son casi el 40 % de la canasta."
+            f"La bencina y el gas son el {_PCT_ENERGIA} % de la canasta; la bencina 95 está en "
+            f"{_pesos(_BENCINA_HOY['mediana'])} el litro en Santiago."
         ),
         indicadores=[
             Indicador(
@@ -259,7 +295,7 @@ _DETALLES = {
                 presion=Presion.media,
                 descripcion="Costo de una canasta semanal típica (indicador propio).",
                 serie=[PuntoSerie(fecha=p.semana, valor=p.precio) for p in CANASTA.serie],
-                banda_normal=BandaNormal(min=124000, max=128500),
+                # Sin banda hasta guardar la historia de la canasta completa.
                 fuente="ODEPA, CNE, Panel de Expertos",
                 dato_al=CANASTA.dato_al,
             ),
@@ -276,18 +312,7 @@ _DETALLES = {
                 dato_al=_MARRAQUETA.dato_al,
             ),
             _IND_IPC,
-            Indicador(
-                id="bencina",
-                nombre="Bencina 95",
-                valor="$1.312 / litro",
-                variacion=f"+1,2{NBSP}% semanal",
-                presion=Presion.alta,
-                descripcion="Promedio de estaciones de servicio de Santiago.",
-                serie=_mensual([1215, 1228, 1240, 1236, 1250, 1262, 1259, 1270, 1281, 1290, 1296, 1312], (2026, 10)),
-                banda_normal=BandaNormal(min=1180, max=1290),
-                fuente="CNE",
-                dato_al=date(2026, 10, 14),
-            ),
+            _IND_BENCINA,
         ],
         percepcion=Percepcion(
             nombre="Percepción económica (IPEC)",
