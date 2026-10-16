@@ -4,6 +4,7 @@ import { StyleSheet, View } from 'react-native';
 import type { Herramientas } from '@/api/tipos';
 import { Encabezado } from '@/components/encabezado';
 import { Fila } from '@/components/fila';
+import { MiImpacto } from '@/components/mi-impacto';
 import { ContenidoApi, Pagina } from '@/components/pagina';
 import { Seccion } from '@/components/seccion';
 import { SelectorSegmentado } from '@/components/selector-segmentado';
@@ -21,7 +22,7 @@ export default function HerramientasScreen() {
 
   return (
     <Pagina>
-      <Encabezado titulo="Herramientas" bajada="Calculadoras, tu AFP, el calendario de datos y ajustes." />
+      <Encabezado titulo="Herramientas" bajada="Tu impacto en pesos, tu AFP, calculadoras, el calendario de datos y ajustes." />
       <ContenidoApi estado={estado} recargar={recargar}>
         {(h) => <Contenido herramientas={h} />}
       </ContenidoApi>
@@ -32,6 +33,8 @@ export default function HerramientasScreen() {
 function Contenido({ herramientas: h }: { herramientas: Herramientas }) {
   return (
     <>
+      <MiImpacto />
+
       <MiAfp afp={h.mi_afp} />
 
       <Seccion titulo="Calculadoras">

@@ -23,3 +23,9 @@ export function fechaLarga(iso: string): string {
   const diaSemana = DIAS[new Date(anio, mes - 1, dia).getDay()];
   return `${diaSemana[0].toUpperCase()}${diaSemana.slice(1)} ${dia} de ${MESES_LARGOS[mes - 1]}`;
 }
+
+/** "2025-10-01" → "octubre de 2025" */
+export function mesYAnio(iso: string): string {
+  const { anio, mes } = partes(iso);
+  return `${MESES_LARGOS[mes - 1]} de ${anio}`;
+}

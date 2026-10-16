@@ -151,3 +151,39 @@ export type Home = {
   max_termometros_home: number;
   aviso_legal: string;
 };
+
+/** Planes y capacidades (docs/planes.md). */
+export type Plan = 'gratis' | 'pro' | 'empresas';
+export type ModoPlanes = 'abierto' | 'vista_previa' | 'activo';
+
+export type EstadoCapacidad = {
+  activa: boolean;
+  plan_minimo: Plan;
+  limite: number | null;
+};
+
+export type Capacidades = {
+  modo: ModoPlanes;
+  plan: Plan;
+  capacidades: Record<string, EstadoCapacidad>;
+};
+
+/** Valores de referencia para Mi impacto. El cálculo con los datos del usuario se hace en el dispositivo. */
+export type ValorFechado = { fecha: string; valor: number };
+
+export type ReferenciasMiImpacto = {
+  uf: {
+    hoy: ValorFechado;
+    ultima_publicada: ValorFechado;
+    hace_un_mes: ValorFechado;
+    hace_un_anio: ValorFechado;
+    fuente: string;
+  };
+  bencina95: {
+    hoy: ValorFechado;
+    hace_un_anio: ValorFechado;
+    estaciones: number;
+    region: string;
+    fuente: string;
+  };
+};
