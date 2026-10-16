@@ -35,7 +35,9 @@ Las cantidades son un punto de partida para un hogar tipo y una semana, y **hay 
 ## Cálculo
 
 1. **Precio por producto:** para cada producto se toma el "Precio promedio" de ODEPA de la semana. Luego se calcula la **mediana** entre los sectores de la región y los tipos de local (supermercado, feria, panadería, carnicería). La mediana evita que un sector o local extremo distorsione el resultado.
-2. **Bencina y gas:** promedio de las estaciones o distribuidores de la región que actualizaron su precio en los últimos 7 días (ver la regla de la CNE en [fuentes-de-datos.md](fuentes-de-datos.md)).
+2. **Bencina y gas:**
+   - **Bencina 95:** mediana de las estaciones de la región que actualizaron su precio en los últimos 7 días (ver la regla de la CNE en [fuentes-de-datos.md](fuentes-de-datos.md)).
+   - **Gas:** promedio mensual de la CNE del cilindro corriente de 15 kg en la región.
 3. **Pasaje:** tarifa vigente; se cambia solo cuando hay una resolución nueva.
 4. **Costo de la canasta** = Σ (precio × cantidad).
 5. **Índice** = costo de la semana ÷ costo de la semana base × 100.
@@ -49,7 +51,8 @@ Las cantidades son un punto de partida para un hogar tipo y una semana, y **hay 
 ## Historia disponible
 
 - ODEPA publica CSV por año (al menos desde 2023), así que la parte de alimentos se puede **calcular hacia atrás** desde el día uno.
-- Para la bencina y el gas hay que confirmar si la API de la CNE entrega histórico. Si no, la serie parte desde que empecemos a guardar los datos. Por eso conviene **empezar a guardar cuanto antes**, aunque la app no esté lista.
+- **La CNE sí entrega historia,** pero solo mensual: bencina desde 1994 y gas desde 2000, por región. Sirve para el gráfico y la presión, pero no para la serie semanal de la canasta.
+- **Mientras no guardemos el precio diario,** la canasta usa el precio de hoy de la bencina y el gas en todas las semanas. Su variación semanal refleja solo los alimentos. Hay que empezar a guardar el precio diario cuanto antes.
 
 ## Reglas de comunicación
 

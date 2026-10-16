@@ -20,7 +20,7 @@
 
 - [x] Token de la **API del Banco Central** (BDE): API Key Token de "Mi Cuenta", vigencia de un año (se puede extender sin cambiarlo). Va en `BCCH_TOKEN`.
 - [ ] `apikey` de la **API de la CMF**.
-- [ ] Token de la **API de la CNE** (`api.cne.cl/register`).
+- [x] Cuenta de la **API de la CNE**: el token se pide en `POST https://api.cne.cl/api/login` con correo y clave (`CNE_EMAIL`, `CNE_PASSWORD`); las respuestas vienen comprimidas con gzip. Probada el 15-oct-2026: 1.829 estaciones.
 - [ ] Credenciales de la **API del Coordinador Eléctrico** (nuevo).
 - [ ] Ticket de **Mercado Público** (con Clave Única; nuevo, opcional).
 - [ ] Claves gratuitas de **FRED** y **EIA**: probablemente innecesarias, porque la BDE ya trae el cobre, el WTI, el Brent, el diésel y la bencina de EE. UU. ([banco-central-series.md](banco-central-series.md)).
@@ -52,7 +52,7 @@
 | 1 | ODEPA | Semanal (viernes) | Convertir `snapshot_odepa.py` en conector |
 | 1 | Superintendencia de Pensiones (valor cuota) | Diaria | Convertir `snapshot_afp.py`; reprocesar los datos provisionales cuando se confirmen |
 | 1 | CMF (TMC, tasas, UTM) | Diaria / mensual | |
-| 2 | CNE (bencina y gas) | Diaria | Filtrar estaciones sin actualizar (ver la regla en fuentes-de-datos.md) |
+| 2 | CNE (bencina y gas) | Diaria | `scripts/snapshot_cne.py` ya hace la foto (mediana de estaciones frescas e historia mensual). **Falta guardarla en Supabase y correrla a diario** para tener historia semanal |
 | 2 | ENAP / CNE (paridad MEPCO) | Semanal | Para el aviso "la bencina debería subir o bajar" |
 | 2 | Seguro de cesantía | Mensual | Indicador adelantado de empleo |
 | 2 | CMF hechos esenciales | Diaria | Desde las alertas por correo |
@@ -66,7 +66,7 @@
 
 - [x] **Estado de presión real** para los indicadores del Banco Central: percentiles 20/80 de 5 años ([termometros.md](termometros.md)), en `app/calculos/presion.py`. Falta aplicarlo a ODEPA, AFP y bencina cuando tengan historia guardada.
 - [ ] **Regla para combinar indicadores** en el estado de cada termómetro (está pendiente desde el diseño).
-- [ ] **Índice de canasta automático,** con bencina y gas reales de la CNE ([indice-canasta.md](indice-canasta.md)).
+- [ ] **Índice de canasta automático:** la bencina y el gas ya son reales, con el precio de hoy. Falta usar el precio de cada semana cuando se guarde a diario ([indice-canasta.md](indice-canasta.md)).
 - [ ] **"Lo que cambió esta semana"** a partir de las observaciones reales.
 - [ ] **Datos propios** de [investigacion-fuentes-ampliadas.md](investigacion-fuentes-ampliadas.md), sección 4. Empezar por: horas de trabajo para la canasta, costo de llenar el estanque, aviso de la bencina, sueldo real y rentabilidad real de las AFP.
 - [ ] **Tabla de ingreso mínimo** con fechas de vigencia, para los cálculos que lo usan.

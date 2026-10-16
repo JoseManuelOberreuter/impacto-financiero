@@ -16,7 +16,7 @@
 | Bolsa (nuam) | Sí, pero cerrada o de pago | Licencia o proveedor autorizado | 2 | 🔴 Sin acceso hoy |
 | Prensa | No | RSS: solo titular, bajada y enlace | 1 | 🟡 Parcial |
 | ODEPA (alimentos) | Sí (CKAN) | CSV anual, actualizado semanalmente | 1 | 🟢 Verificado (probado) |
-| CNE (bencina y gas) | Sí (REST) | API con token Bearer | 1 | 🟡 Por probar |
+| CNE (bencina y gas) | Sí (REST) | Login con correo y clave → token Bearer | 1 | 🟢 Verificado |
 | Transporte público | No | Resolución del Panel de Expertos, carga manual | 1 | 🟢 Manual |
 
 ---
@@ -149,8 +149,8 @@ Precios de productos y servicios del día a día, para mostrar "cuánto cuesta v
 | Huevos (bandeja de 30) | ODEPA | CSV datos abiertos | Semanal | 🟢 Probado |
 | Aceite vegetal (botella de 900 ml) | ODEPA | CSV datos abiertos | Semanal | 🟢 Probado |
 | Carne de vacuno (posta) y pollo entero (kilo) | ODEPA | CSV datos abiertos | Semanal | 🟢 Probado |
-| Bencina 93/95/97 y diésel (litro) | CNE: Bencina en Línea | API con token | Diaria o más | 🟡 Por probar |
-| Gas licuado (cilindro de 15 kg) | CNE: Gas en Línea | API con token | Diaria o más | 🟡 Por probar |
+| Bencina 93/95/97 y diésel (litro) | CNE: Bencina en Línea | API con token | Diaria o más | 🟢 Verificado |
+| Gas licuado (cilindro de 15 kg) | CNE: Gas en Línea | API con token | Mensual (promedio por región) | 🟢 Verificado |
 | Pasaje de Metro y buses RED | Panel de Expertos del Transporte Público | Resolución en el Diario Oficial | Cuando cambia | 🟢 Manual |
 | UF / UTM | Banco Central / CMF | API (ver secciones 1 y 2) | Diaria / mensual | 🟢 Verificado |
 
@@ -182,12 +182,23 @@ Los rangos de referencia que teníamos calzan bien con los datos reales. Convien
 ### CNE: bencina y gas licuado
 
 - **Portal:** `https://api.cne.cl`. El registro es gratuito en `/register`. La documentación está en `https://apidocs.cne.cl` y el soporte en `soporteapi@cne.cl`.
-- **Autenticación:** token tipo `Authorization: Bearer <token>`.
-- **Endpoints encontrados en la documentación:**
-  - Bencina: `GET /api/v4/estaciones` (estaciones de servicio con precios), `/api/v4/combustible/vehicular/tiposcombustibles`, `/api/v4/combustible/vehicular/distribuidores`.
-  - Gas licuado ("calefacción"): `/api/v3/combustible/calefaccion/puntosdeventa`, `/marcas`, `/tamanos`, `/tipos`, `/callcenters`.
-- **Uso:** calcular el precio **promedio, mínimo y máximo por región o comuna** de la bencina de 95 y del cilindro de 15 kg. La CNE declara públicos los precios de las estaciones (Rex CNE 492/2023).
-- **Pendiente:** registrarse, probar los endpoints y confirmar los campos de precio y los límites de uso.
+- **Autenticación:** `POST /api/login` con `email` y `password` (formulario) devuelve `{"token": ...}`. Ese token va como `Authorization: Bearer <token>`. Se pide uno nuevo en cada descarga; en el `.env` van `CNE_EMAIL` y `CNE_PASSWORD`.
+- **Las respuestas vienen comprimidas con gzip**, aunque no se pida: hay que descomprimirlas antes de leer el JSON.
+- **Endpoints probados el 15-oct-2026:**
+
+  | Endpoint | Qué trae | Uso |
+  |---|---|---|
+  | `GET /api/v4/estaciones` | 1.829 estaciones (3 MB): región, comuna, dirección, coordenadas, marca, servicios, medios de pago y precio de cada combustible (93, 95, 97, diésel, parafina, GLP vehicular) con fecha y hora de actualización | Precio de hoy: mediana por región |
+  | `GET /api/ea/precio/combustibleliquido` | Promedio mensual por región de bencina 93, 95 y 97, diésel y parafina, **desde 1994** | Historia, gráfico y presión |
+  | `GET /api/ea/precio/glp` | Promedio mensual por región del gas licuado en cilindro (5, 11, 15 y 45 kg; corriente y catalítico), **desde 2000** | Gas de la canasta |
+  | `GET /api/v3/combustible/calefaccion/puntosdeventa` | Distribuidores de gas con precio por marca y tamaño | Para más adelante (precio por comuna) |
+
+- **Otros datos de la misma API:** venta mensual de combustibles, importaciones y exportaciones de combustibles, generación eléctrica, capacidad instalada y proyectos de energía. Lista completa en `https://apidocs.cne.cl`.
+- **Problemas de calidad encontrados:**
+  - **Precios viejos:** en la Región Metropolitana solo ~40 de 436 estaciones actualizaron la bencina 93 en la última semana. Se usa la mediana de las estaciones con precio de los últimos 7 días (30 si son menos de 10).
+  - **Historia con meses corruptos:** algunos meses de 2025 y 2026 traen el nombre del combustible en vez del precio (por ejemplo, `"gasolina_95_sp"`). Esos meses se descartan.
+- **Uso:** precio de hoy de la bencina y precio del gas para la canasta, y gráfico y presión de la bencina en el termómetro Bolsillo. La CNE declara públicos los precios de las estaciones (Rex CNE 492/2023).
+- **Script:** [`impacto-api/scripts/snapshot_cne.py`](../impacto-api/scripts/snapshot_cne.py).
 
 ### Transporte público (RM)
 
@@ -240,7 +251,7 @@ Son los datos mensuales con desfase natural: **DIPRES, IMACEC, desempleo e IPC**
 - Mostrar la **próxima actualización** tomada de los calendarios oficiales: "El próximo IPC sale el 8-nov".
 - **Marcar los datos provisionales**, como el valor cuota de las AFP de los últimos días.
 - **No cruzar períodos distintos** como si fueran del mismo momento.
-- **CNE:** usar solo estaciones actualizadas en los últimos X días y mostrar "promedio de N estaciones".
+- **CNE:** usar solo estaciones actualizadas en los últimos 7 días (30 si son menos de 10) y mostrar "mediana de N estaciones".
 - Programar cada ingestor según su frecuencia real, no consultar todo a cada rato.
 
 ## Respaldo no oficial
