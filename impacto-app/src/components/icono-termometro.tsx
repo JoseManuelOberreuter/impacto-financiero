@@ -4,9 +4,9 @@ import {
   CircleDollarSign,
   Factory,
   Landmark,
-  Newspaper,
   PiggyBank,
   ShoppingCart,
+  Users,
   type LucideIcon,
   type LucideProps,
 } from 'lucide-react-native';
@@ -17,7 +17,7 @@ const ICONOS: Record<string, LucideIcon> = {
   ahorro: PiggyBank,
   actividad: Factory,
   dolar: CircleDollarSign,
-  animo: Newspaper,
+  animo: Users,
 };
 
 export function IconoTermometro({ id, ...props }: LucideProps & { id: string }) {
