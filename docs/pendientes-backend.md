@@ -19,7 +19,7 @@
 ## Fase 0: cuentas y claves (las debe pedir el usuario)
 
 - [x] Token de la **API del Banco Central** (BDE): API Key Token de "Mi Cuenta", vigencia de un año (se puede extender sin cambiarlo). Va en `BCCH_TOKEN`.
-- [ ] `apikey` de la **API de la CMF**.
+- [x] `apikey` de la **API de la CMF** (`CMF_API_KEY`). Probada el 15-oct-2026: UF, dólar, UTM, TMC (12 tramos) y TIP responden; la TAB está suspendida por la CMF. Los hechos esenciales no vienen en la API.
 - [x] Cuenta de la **API de la CNE**: el token se pide en `POST https://api.cne.cl/api/login` con correo y clave (`CNE_EMAIL`, `CNE_PASSWORD`); las respuestas vienen comprimidas con gzip. Probada el 15-oct-2026: 1.829 estaciones.
 - [ ] Credenciales de la **API del Coordinador Eléctrico** (nuevo).
 - [ ] Ticket de **Mercado Público** (con Clave Única; nuevo, opcional).
@@ -51,7 +51,7 @@
 | 1 | Banco Central (BDE) | Diaria + calendario de publicaciones | Catálogo listo en [banco-central-series.md](banco-central-series.md). `scripts/snapshot_bcch.py` ya descarga 16 series a un JSON: **falta que guarde en Supabase** y correrlo a diario en el worker |
 | 1 | ODEPA | Semanal (viernes) | Convertir `snapshot_odepa.py` en conector |
 | 1 | Superintendencia de Pensiones (valor cuota) | Diaria | Convertir `snapshot_afp.py`; reprocesar los datos provisionales cuando se confirmen |
-| 1 | CMF (TMC, tasas, UTM) | Diaria / mensual | |
+| 1 | CMF (TMC, tasas, UTM) | Diaria / mensual | `scripts/snapshot_cmf.py` ya descarga 6 años de la TMC en todos sus tramos. **Falta guardarla en Supabase** |
 | 2 | CNE (bencina y gas) | Diaria | `scripts/snapshot_cne.py` ya hace la foto (mediana de estaciones frescas e historia mensual). **Falta guardarla en Supabase y correrla a diario** para tener historia semanal |
 | 2 | ENAP / CNE (paridad MEPCO) | Semanal | Para el aviso "la bencina debería subir o bajar" |
 | 2 | Seguro de cesantía | Mensual | Indicador adelantado de empleo |

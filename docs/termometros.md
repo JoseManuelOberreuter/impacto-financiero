@@ -13,11 +13,11 @@ El home no muestra muchos datos. Cada **termómetro** agrupa varios indicadores 
 | Termómetro | Pregunta que responde | Indicadores detrás | Etapa |
 |---|---|---|---|
 | 🛒 **Bolsillo** | ¿Está más cara la vida? | Índice de canasta, IPC, bencina, gas, pasaje | 1 |
-| 🏦 **Deudas** | ¿Está más caro endeudarse? | UF, TPM, tasas de crédito (CMF), TMC | 1 |
+| 🏦 **Deudas** | ¿Está más caro endeudarse? | TPM, tasa máxima convencional (CMF), tasa hipotecaria y de consumo | 1 |
 | 💰 **Ahorro y pensiones** | ¿Cómo le va a mi plata? | Fondos AFP A–E, UF vs. depósito a plazo | 1 |
 | 🏭 **Actividad y empleo** | ¿Cómo va la economía en general? | IMACEC, desempleo, remuneraciones | 1 |
 | 💵 **Dólar y mercados** | ¿Qué pasa afuera? | Dólar, cobre, IPSA (cuando tengamos licencia) | 1 (sin IPSA) |
-| 📰 **Ánimo** | ¿De qué se está hablando? | Tono de la prensa, incertidumbre, hechos esenciales, IPEC (ver [sentimiento-noticias.md](sentimiento-noticias.md)) | 1 |
+| 📰 **Ánimo** | ¿Cómo se siente la gente? | Hoy: percepción de las personas (IPEC) y confianza de las empresas (IMCE). Después: tono de la prensa, incertidumbre y hechos esenciales (ver [sentimiento-noticias.md](sentimiento-noticias.md)) | 1 |
 
 ## Onboarding y personalización
 
@@ -140,11 +140,13 @@ Dato al 9-oct · próxima actualización 16-oct
 ## Estado de presión
 
 - Se habla de **presión** (baja / media / alta), **no de "bueno" o "malo"**. Un mismo dato puede ser bueno para unos y malo para otros (un dólar alto perjudica a quien importa y beneficia a quien exporta).
-- **Cómo se calcula (propuesta):** cada indicador se compara con su propia historia de los últimos 5 años.
-  - La variación actual está en el 20 % más alto → presión **alta**.
-  - En el 20 % más bajo → presión **baja**.
-  - En el resto → presión **media**.
-  - El estado del termómetro combina el de sus indicadores. La regla exacta está por definir.
+- **Cómo se calcula (implementado en `impacto-api/app/calculos/presion.py`):** cada indicador se compara con su propia historia de los últimos 5 años.
+  - El valor actual está sobre el percentil 80 → presión **alta**.
+  - Bajo el percentil 20 → presión **baja**.
+  - En el resto → presión **media**. La franja gris de los gráficos es ese rango normal (percentiles 20 a 80).
+  - **Indicadores invertidos:** en el IMACEC, el cobre, el IPEC y el IMCE un valor *bajo* es el que presiona, así que la regla se da vuelta.
+  - **Estado del termómetro:** manda la presión más alta de sus indicadores principales (Bolsillo: IPC y bencina; Deudas: TPM y tasa máxima; Actividad: desempleo e IMACEC; Ánimo: IPEC e IMCE).
+  - **Historia corta:** la marraqueta y la canasta usan sus últimas 12 semanas hasta guardar más historia. Las AFP quedan en presión media hasta guardar la historia de sus valores cuota.
 - Las reglas se **publican** en la app, igual que la metodología de la canasta.
 - Además del estado se muestra la **tendencia** (▲ ▼ ●) respecto del dato anterior.
 

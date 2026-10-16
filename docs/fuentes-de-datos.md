@@ -49,6 +49,7 @@
 - **Formato:** XML por defecto; JSON con `formato=json`.
 - **Autenticación:** parámetro `apikey`, que se solicita en el portal de la API.
 - **Uso:** respaldo del Banco Central para UF, dólar y UTM, y **fuente principal de TMC (tasa máxima convencional) y datos de bancos**.
+- **Probada el 15-oct-2026** (`/api-sbifv3/recursos_api/{recurso}?apikey=...&formato=json`): `uf`, `dolar`, `utm`, `tmc` (12 tramos de tasa máxima convencional) y `tip` responden. La `tab` está suspendida: la CMF deriva a Chilean Benchmark Facility. La historia se pide por año (`tmc/2026`): una TMC por mes y tramo. El tramo 44 (créditos en pesos de 50 a 200 UF a 90 días o más) es el de un crédito de consumo típico; los tramos 41 y 42 dejaron de publicarse en nov-2023.
 
 ## 3. CMF: hechos esenciales
 
