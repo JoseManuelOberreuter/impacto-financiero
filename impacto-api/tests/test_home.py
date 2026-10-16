@@ -24,7 +24,9 @@ def test_home_entrega_termometros_por_defecto_validos():
 
 def test_cambios_enlazan_a_su_detalle_y_tienen_serie():
     cambios = cliente.get("/v1/home").json()["cambios"]
-    assert len(cambios) == 6
+    # Un dato por tema: bencina, gas, dólar, UF, tasa máxima, cobre y el alimento que más se movió.
+    assert len(cambios) == 7
+    assert sum(c["enlace"].startswith("/precios/") for c in cambios) == 1
     for cambio in cambios:
         assert len(cambio["serie"]) >= 2
         assert cliente.get("/v1" + cambio["enlace"]).status_code == 200
