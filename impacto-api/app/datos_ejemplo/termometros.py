@@ -1,10 +1,11 @@
 """Termómetros de ejemplo.
 
-Bolsillo y Ahorro usan las fotos reales de ODEPA y de la Superintendencia de
-Pensiones. IPC, TPM, tasa hipotecaria, desempleo, IMACEC, dólar, cobre e IPEC
-vienen de la foto real del Banco Central (banco_central.py), con la presión
-calculada sobre 5 años. La bencina viene de la foto real de la CNE (cne.py).
-El tono de las noticias sigue de ejemplo.
+Todos los indicadores vienen de fotos reales de las fuentes: ODEPA (alimentos),
+Superintendencia de Pensiones (AFP), Banco Central (IPC, TPM, tasas, desempleo,
+IMACEC, dólar, cobre, IPEC e IMCE), CNE (bencina) y CMF (tasa máxima
+convencional). La presión se calcula sobre la historia de cada indicador.
+Pendientes: el tono de las noticias (falta la prensa) y la presión de las AFP
+(falta guardar su historia).
 """
 
 import json
@@ -14,8 +15,8 @@ from pathlib import Path
 
 from app.calculos.presion import evaluar, la_mas_alta
 from app.datos_ejemplo import banco_central as bc
-from app.datos_ejemplo import cne
-from app.datos_ejemplo.precios import CANASTA, PRODUCTOS_POR_ID
+from app.datos_ejemplo import cmf, cne
+from app.datos_ejemplo.precios import CANASTA, PRODUCTOS, PRODUCTOS_POR_ID, con_articulo
 from app.modelos.termometros import (
     BandaNormal,
     Indicador,
@@ -183,6 +184,113 @@ _PCT_ENERGIA = round(
     sum(i.porcentaje for i in CANASTA.composicion if "bencina" in i.nombre or "gas" in i.nombre)
 )
 
+# --- Tasa máxima convencional: foto real de la CMF ---
+
+_TMC = cmf.tmc()
+_TMC_FECHA, _TMC_HOY = _TMC[-1]
+_TMC_HACE_UN_ANIO = next(v for f, v in reversed(_TMC) if f <= _TMC_FECHA.replace(year=_TMC_FECHA.year - 1))
+_PRESION_TMC, _BANDA_TMC = evaluar(
+    _TMC_HOY, [v for f, v in _TMC if f > _TMC_FECHA.replace(year=_TMC_FECHA.year - 5)]
+)
+_IND_TMC = Indicador(
+    id="tmc",
+    nombre="Tasa máxima convencional",
+    valor=f"{bc.tasa(_TMC_HOY)} al año",
+    variacion=f"{bc.puntos_porcentuales(_TMC_HOY - _TMC_HACE_UN_ANIO)} en 12 meses",
+    presion=_PRESION_TMC,
+    descripcion=(
+        "Lo máximo que la ley permite cobrar en un crédito en pesos de 50 a 200 UF a más de 90 días, "
+        "como un crédito de consumo. La fija la CMF cada mes."
+    ),
+    serie=[PuntoSerie(fecha=f, valor=v) for f, v in _TMC[-12:]],
+    banda_normal=_BANDA_TMC,
+    fuente=cmf.FUENTE,
+    dato_al=_TMC_FECHA,
+)
+_PRESION_DEUDAS = la_mas_alta(_PRESION_TPM, _PRESION_TMC)
+
+# --- Ánimo: percepción de personas (IPEC) y empresas (IMCE), del Banco Central ---
+
+_IMCE = bc.SERIES["imce"]
+_IPEC_SERIE = bc.SERIES["ipec"]
+
+
+def _cambio_mensual(serie: bc.Serie) -> float:
+    return serie.ultimo.valor - serie.puntos[-2].valor
+
+
+def _puntos(cambio: float) -> str:
+    signo = "+" if cambio > 0 else "−" if cambio < 0 else ""
+    return f"{signo}{bc.numero(abs(cambio))} puntos frente al mes anterior"
+
+
+_IND_IPEC, _PRESION_IPEC = bc.indicador(
+    "ipec", "Percepción de las personas (IPEC)", f"{bc.numero(_IPEC.valor)} puntos",
+    _puntos(_cambio_mensual(_IPEC_SERIE)),
+    "Encuesta de GfK Chile sobre cómo ven las personas su situación y la del país. "
+    "Bajo 50 hay más pesimismo que optimismo.",
+    invertida=True, dato_al=bc.fin_de_mes(_IPEC.fecha),
+)
+_IND_IMCE, _PRESION_IMCE = bc.indicador(
+    "imce", "Confianza de las empresas (IMCE)", f"{bc.numero(_IMCE.ultimo.valor)} puntos",
+    _puntos(_cambio_mensual(_IMCE)),
+    "Indicador de ICARE y la Universidad Adolfo Ibáñez sobre la confianza de los empresarios. "
+    "Bajo 50 hay más pesimismo que optimismo.",
+    invertida=True, dato_al=bc.fin_de_mes(_IMCE.ultimo.fecha),
+)
+_PRESION_ANIMO = la_mas_alta(_PRESION_IPEC, _PRESION_IMCE)
+
+
+def _texto_animo() -> str:
+    def lectura(valor: float) -> str:
+        return "pesimistas" if valor < 45 else "optimistas" if valor > 55 else "en un punto neutro"
+
+    return (
+        f"Las personas están {lectura(_IPEC.valor)} ({bc.numero(_IPEC.valor)} puntos) y las empresas, "
+        f"{lectura(_IMCE.ultimo.valor)} ({bc.numero(_IMCE.ultimo.valor)}), en una escala donde 50 es neutro."
+    )
+
+
+# --- Textos de Bolsillo y Ahorro a partir de los datos ---
+
+
+def _nombres(lista: list) -> str:
+    nombres = [con_articulo(p) for p in lista]
+    return nombres[0] if len(nombres) == 1 else ", ".join(nombres[:-1]) + " y " + nombres[-1]
+
+
+def _texto_alimentos() -> str:
+    bajaron = sorted([p for p in PRODUCTOS if p.variacion_semanal <= -0.5], key=lambda p: p.variacion_semanal)[:3]
+    subieron = sorted([p for p in PRODUCTOS if p.variacion_semanal >= 0.5], key=lambda p: -p.variacion_semanal)[:3]
+    partes = []
+    if bajaron:
+        partes.append(f"bajaron {_nombres(bajaron)}")
+    if subieron:
+        partes.append(f"subieron {_nombres(subieron)}")
+    if not partes:
+        return "Los alimentos casi no cambiaron de precio esta semana."
+    texto = "; ".join(partes)
+    return texto[0].upper() + texto[1:] + "."
+
+
+def _texto_canasta() -> str:
+    cambio = CANASTA.variacion_semanal
+    if abs(cambio) < 0.5:
+        return f"La canasta se mantuvo esta semana ({_pct(cambio)})."
+    return f"La canasta {'subió' if cambio > 0 else 'bajó'} {bc.pct(abs(cambio))} esta semana."
+
+
+def _texto_fondos() -> str:
+    a, e = _mediana_fondo("A", "mes"), _mediana_fondo("E", "mes")
+    return (
+        f"En el último mes el Fondo A, el más riesgoso, {'ganó' if a >= 0 else 'perdió'} {bc.pct(abs(a))} "
+        f"y el Fondo E, el más conservador, {'ganó' if e >= 0 else 'perdió'} {bc.pct(abs(e))}."
+    )
+
+
+_PRESION_MARRAQUETA, _BANDA_MARRAQUETA = evaluar(_MARRAQUETA.precio, [p.precio for p in _MARRAQUETA.serie])
+_PRESION_CANASTA, _ = evaluar(CANASTA.total, [p.precio for p in CANASTA.serie])
+
 _PRESION_BOLSILLO = la_mas_alta(_PRESION_IPC, _PRESION_BENCINA)
 _PRESION_ACTIVIDAD = la_mas_alta(_PRESION_DESEMPLEO, _PRESION_IMACEC)
 
@@ -197,9 +305,9 @@ TERMOMETROS = [
         pregunta="¿Está más cara la vida?",
         presion=_PRESION_BOLSILLO,
         etiqueta_presion=_etiqueta(_PRESION_BOLSILLO),
-        tendencia=Tendencia.baja,
+        tendencia=bc.tendencia(CANASTA.variacion_semanal, 0.5),
         dato_clave=f"Canasta semanal: {_pesos(CANASTA.total)} ({_pct(CANASTA.variacion_semanal)})",
-        frase="Bajaron el pan, el pollo y el aceite; subieron los huevos.",
+        frase=_texto_alimentos(),
         dato_al=CANASTA.dato_al,
         proxima_actualizacion=date(2026, 10, 16),
         fuentes=["ODEPA", "CNE", "Panel de Expertos"],
@@ -208,8 +316,8 @@ TERMOMETROS = [
         id="deudas",
         nombre="Deudas",
         pregunta="¿Está más caro endeudarse?",
-        presion=_PRESION_TPM,
-        etiqueta_presion=_etiqueta(_PRESION_TPM),
+        presion=_PRESION_DEUDAS,
+        etiqueta_presion=_etiqueta(_PRESION_DEUDAS),
         tendencia=bc.tendencia(_TPM_CAMBIO, 0.01),
         dato_clave=f"Tasa del Banco Central: {bc.tasa(_TPM.ultimo.valor)}",
         frase=_texto_tpm(),
@@ -225,7 +333,7 @@ TERMOMETROS = [
         etiqueta_presion="Presión media",
         tendencia=Tendencia.estable,
         dato_clave=f"Fondo C: {_pct(_mediana_fondo('C', 'mes'))} en el mes",
-        frase="Los fondos riesgosos subieron y los conservadores bajaron en el último mes.",
+        frase=_texto_fondos(),
         dato_al=_AFP_AL,
         proxima_actualizacion=date(2026, 10, 16),
         fuentes=["Superintendencia de Pensiones"],
@@ -259,15 +367,15 @@ TERMOMETROS = [
     Termometro(
         id="animo",
         nombre="Ánimo",
-        pregunta="¿De qué se está hablando?",
-        presion=Presion.alta,
-        etiqueta_presion="Más negativo que lo habitual",
-        tendencia=Tendencia.baja,
-        dato_clave="412 titulares de 6 medios",
-        frase="Dominaron el desempleo y el precio de la bencina.",
-        dato_al=date(2026, 10, 14),
-        proxima_actualizacion=date(2026, 10, 15),
-        fuentes=["Prensa", "CMF"],
+        pregunta="¿Cómo se siente la gente?",
+        presion=_PRESION_ANIMO,
+        etiqueta_presion=_etiqueta(_PRESION_ANIMO),
+        tendencia=bc.tendencia(_cambio_mensual(_IPEC_SERIE), 1),
+        dato_clave=f"Percepción de las personas: {bc.numero(_IPEC.valor)} puntos",
+        frase=_texto_animo(),
+        dato_al=bc.fin_de_mes(_IPEC.fecha),
+        proxima_actualizacion=None,
+        fuentes=["GfK Chile", "ICARE y UAI", "Banco Central"],
     ),
 ]
 _POR_ID = {t.id: t for t in TERMOMETROS}
@@ -281,8 +389,7 @@ _METODOLOGIA = (
 _DETALLES = {
     "bolsillo": dict(
         explicacion=(
-            "La canasta semanal bajó levemente porque los alimentos se abarataron: el pan "
-            f"cayó {_pct(abs(_MARRAQUETA.variacion_semanal)).lstrip('+')} y también bajaron el pollo y el aceite. "
+            f"{_texto_canasta()} {_texto_alimentos()} "
             f"La bencina y el gas son el {_PCT_ENERGIA} % de la canasta; la bencina 95 está en "
             f"{_pesos(_BENCINA_HOY['mediana'])} el litro en Santiago."
         ),
@@ -292,7 +399,7 @@ _DETALLES = {
                 nombre="Índice de canasta",
                 valor=_pesos(CANASTA.total),
                 variacion=f"{_pct(CANASTA.variacion_semanal)} semanal",
-                presion=Presion.media,
+                presion=_PRESION_CANASTA,
                 descripcion="Costo de una canasta semanal típica (indicador propio).",
                 serie=[PuntoSerie(fecha=p.semana, valor=p.precio) for p in CANASTA.serie],
                 # Sin banda hasta guardar la historia de la canasta completa.
@@ -304,10 +411,13 @@ _DETALLES = {
                 nombre="Marraqueta",
                 valor=f"{_pesos(_MARRAQUETA.precio)} / kilo",
                 variacion=f"{_pct(_MARRAQUETA.variacion_semanal)} semanal",
-                presion=Presion.baja,
-                descripcion="Mediana de panaderías y supermercados de Santiago.",
+                presion=_PRESION_MARRAQUETA,
+                descripcion=(
+                    "Mediana de panaderías y supermercados de Santiago. La franja es su rango de las últimas "
+                    "12 semanas, hasta tener más historia guardada."
+                ),
                 serie=_semanal_precios("marraqueta"),
-                banda_normal=BandaNormal(min=2100, max=2300),
+                banda_normal=_BANDA_MARRAQUETA,
                 fuente="ODEPA",
                 dato_al=_MARRAQUETA.dato_al,
             ),
@@ -321,7 +431,7 @@ _DETALLES = {
             fuente="GfK Chile, vía Banco Central",
         ),
         proximas_publicaciones=[
-            Publicacion(fecha=date(2026, 10, 16), nombre="Precios de alimentos", fuente="ODEPA"),
+            Publicacion(fecha=CANASTA.dato_al + timedelta(days=7), nombre="Precios de alimentos", fuente="ODEPA"),
             Publicacion(fecha=date(2026, 11, 9), nombre="IPC de octubre", fuente="INE"),
         ],
         herramienta_relacionada="Tu inflación personal",
@@ -330,9 +440,10 @@ _DETALLES = {
         explicacion=(
             f"{_texto_tpm()} Un crédito de consumo cuesta en promedio "
             f"{bc.tasa(bc.SERIES['tasa_consumo'].ultimo.valor)} al año y uno hipotecario, "
-            f"UF + {bc.tasa(_HIPOTECARIA.ultimo.valor)}."
+            f"UF + {bc.tasa(_HIPOTECARIA.ultimo.valor)}. Lo máximo que la ley permite cobrar en un crédito "
+            f"de consumo es {bc.tasa(_TMC_HOY)} al año."
         ),
-        indicadores=[_IND_TPM, _IND_HIPOTECARIA],
+        indicadores=[_IND_TPM, _IND_TMC, _IND_HIPOTECARIA],
         percepcion=None,
         proximas_publicaciones=[
             Publicacion(fecha=date(2026, 10, 28), nombre="Reunión de política monetaria", fuente="Banco Central"),
@@ -341,9 +452,9 @@ _DETALLES = {
     ),
     "ahorro": dict(
         explicacion=(
-            "En el último mes los fondos con más acciones (A y B) subieron, mientras los más "
-            "conservadores (D y E) bajaron. En lo que va del año, el Fondo A rinde "
-            f"{_pct(_mediana_fondo('A', 'anio'))} y el E {_pct(_mediana_fondo('E', 'anio'))}."
+            f"{_texto_fondos()} En lo que va del año, el Fondo A rinde "
+            f"{_pct(_mediana_fondo('A', 'anio'))} y el E {_pct(_mediana_fondo('E', 'anio'))}. "
+            "La presión de los fondos se calculará cuando guardemos su historia."
         ),
         indicadores=[
             Indicador(
@@ -387,23 +498,9 @@ _DETALLES = {
     ),
     "animo": dict(
         explicacion=(
-            "Las noticias económicas de la semana fueron más negativas que lo habitual, "
-            "dominadas por el desempleo y el precio de los combustibles."
+            f"{_texto_animo()} El tono de las noticias económicas se sumará cuando conectemos la prensa."
         ),
-        indicadores=[
-            Indicador(
-                id="tono",
-                nombre="Tono de las noticias",
-                valor="−18",
-                variacion="de −100 a +100",
-                presion=Presion.alta,
-                descripcion="Tono neto de los titulares económicos, promedio de 7 días.",
-                serie=_mensual([-4, -6, -2, -8, -10, -7, -12, -9, -11, -14, -16, -18], (2026, 10)),
-                banda_normal=BandaNormal(min=-12, max=4),
-                fuente="Cálculo propio sobre titulares de prensa",
-                dato_al=date(2026, 10, 14),
-            ),
-        ],
+        indicadores=[_IND_IPEC, _IND_IMCE],
         percepcion=None,
         proximas_publicaciones=[],
         herramienta_relacionada=None,

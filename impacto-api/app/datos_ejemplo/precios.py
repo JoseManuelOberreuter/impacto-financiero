@@ -63,6 +63,20 @@ ENERGIA_Y_TRANSPORTE = [
 ]
 _REFERENCIA_POR_ID = {r.id: r for r in ENERGIA_Y_TRANSPORTE}
 
+# Artículo de cada alimento, para los textos ("la marraqueta", "los huevos").
+_ARTICULOS = {
+    "marraqueta": "la", "hallulla": "la", "leche": "la", "huevos": "los", "aceite": "el",
+    "arroz": "el", "pollo": "el", "posta": "la", "papa": "la", "tomate": "el",
+}
+
+
+def con_articulo(producto: Producto) -> str:
+    return f"{_ARTICULOS.get(producto.id, '')} {producto.nombre.lower()}".strip()
+
+
+def es_plural(producto: Producto) -> bool:
+    return _ARTICULOS.get(producto.id) in ("los", "las")
+
 # Composición propuesta en docs/indice-canasta.md: (id, cantidad, texto de la cantidad).
 _COMPOSICION = [
     ("marraqueta", 4, "4 kg de marraqueta"),

@@ -1,6 +1,6 @@
 {
   "fuente": "Superintendencia de Pensiones",
-  "dato_al": "2026-10-13",
+  "dato_al": "2026-10-14",
   "provisional": true,
   "fondos": [
     {
@@ -8,38 +8,38 @@
       "afps": [
         {
           "afp": "Capital",
-          "anio": 14.58,
-          "mes": 2.01
+          "anio": 14.16,
+          "mes": 1.28
         },
         {
           "afp": "Cuprum",
-          "anio": 15.11,
-          "mes": 1.95
+          "anio": 14.66,
+          "mes": 1.24
         },
         {
           "afp": "Habitat",
-          "anio": 13.44,
-          "mes": 1.96
+          "anio": 13.05,
+          "mes": 1.3
         },
         {
           "afp": "Modelo",
-          "anio": 14.25,
-          "mes": 1.92
+          "anio": 13.81,
+          "mes": 1.21
         },
         {
           "afp": "Planvital",
-          "anio": 14.49,
-          "mes": 1.82
+          "anio": 14.07,
+          "mes": 1.13
         },
         {
           "afp": "Provida",
-          "anio": 14.7,
-          "mes": 1.92
+          "anio": 14.3,
+          "mes": 1.22
         },
         {
           "afp": "Uno",
-          "anio": 14.71,
-          "mes": 1.96
+          "anio": 14.32,
+          "mes": 1.3
         }
       ]
     },
@@ -48,38 +48,38 @@
       "afps": [
         {
           "afp": "Capital",
-          "anio": 10.65,
-          "mes": 1.2
+          "anio": 10.38,
+          "mes": 0.76
         },
         {
           "afp": "Cuprum",
-          "anio": 11.3,
-          "mes": 1.1
+          "anio": 11.02,
+          "mes": 0.66
         },
         {
           "afp": "Habitat",
-          "anio": 9.55,
-          "mes": 1.15
+          "anio": 9.29,
+          "mes": 0.75
         },
         {
           "afp": "Modelo",
-          "anio": 9.41,
-          "mes": 1.01
+          "anio": 9.13,
+          "mes": 0.58
         },
         {
           "afp": "Planvital",
-          "anio": 10.59,
-          "mes": 1.01
+          "anio": 10.31,
+          "mes": 0.62
         },
         {
           "afp": "Provida",
-          "anio": 10.95,
-          "mes": 1.1
+          "anio": 10.68,
+          "mes": 0.67
         },
         {
           "afp": "Uno",
-          "anio": 10.79,
-          "mes": 1.17
+          "anio": 10.53,
+          "mes": 0.77
         }
       ]
     },
@@ -88,38 +88,38 @@
       "afps": [
         {
           "afp": "Capital",
-          "anio": 3.38,
-          "mes": -0.12
+          "anio": 3.24,
+          "mes": -0.07
         },
         {
           "afp": "Cuprum",
-          "anio": 3.73,
-          "mes": -0.02
+          "anio": 3.56,
+          "mes": 0.01
         },
         {
           "afp": "Habitat",
-          "anio": 3.17,
-          "mes": 0.04
+          "anio": 3.01,
+          "mes": 0.11
         },
         {
           "afp": "Modelo",
-          "anio": 2.08,
-          "mes": -0.46
+          "anio": 1.91,
+          "mes": -0.43
         },
         {
           "afp": "Planvital",
-          "anio": 3.27,
-          "mes": -0.29
+          "anio": 3.09,
+          "mes": -0.25
         },
         {
           "afp": "Provida",
-          "anio": 3.0,
-          "mes": -0.31
+          "anio": 2.84,
+          "mes": -0.28
         },
         {
           "afp": "Uno",
-          "anio": 3.72,
-          "mes": -0.19
+          "anio": 3.57,
+          "mes": -0.12
         }
       ]
     },
@@ -128,38 +128,38 @@
       "afps": [
         {
           "afp": "Capital",
-          "anio": -1.95,
-          "mes": -0.96
+          "anio": -1.97,
+          "mes": -0.64
         },
         {
           "afp": "Cuprum",
-          "anio": -1.23,
-          "mes": -0.78
+          "anio": -1.3,
+          "mes": -0.5
         },
         {
           "afp": "Habitat",
-          "anio": -1.62,
-          "mes": -0.75
+          "anio": -1.72,
+          "mes": -0.59
         },
         {
           "afp": "Modelo",
-          "anio": -2.19,
-          "mes": -0.83
+          "anio": -2.22,
+          "mes": -0.64
         },
         {
           "afp": "Planvital",
-          "anio": -1.85,
-          "mes": -1.08
+          "anio": -1.88,
+          "mes": -0.75
         },
         {
           "afp": "Provida",
-          "anio": -2.15,
-          "mes": -1.07
+          "anio": -2.19,
+          "mes": -0.74
         },
         {
           "afp": "Uno",
-          "anio": -1.38,
-          "mes": -1.05
+          "anio": -1.39,
+          "mes": -0.69
         }
       ]
     },
@@ -168,38 +168,38 @@
       "afps": [
         {
           "afp": "Capital",
-          "anio": -6.43,
-          "mes": -1.6
+          "anio": -6.29,
+          "mes": -1.16
         },
         {
           "afp": "Cuprum",
-          "anio": -5.88,
-          "mes": -1.27
+          "anio": -5.8,
+          "mes": -0.84
         },
         {
           "afp": "Habitat",
-          "anio": -5.56,
-          "mes": -1.31
+          "anio": -5.58,
+          "mes": -1.08
         },
         {
           "afp": "Modelo",
-          "anio": -6.84,
-          "mes": -1.35
+          "anio": -6.76,
+          "mes": -1.08
         },
         {
           "afp": "Planvital",
-          "anio": -5.67,
-          "mes": -1.53
+          "anio": -5.56,
+          "mes": -1.09
         },
         {
           "afp": "Provida",
-          "anio": -5.99,
-          "mes": -1.55
+          "anio": -5.88,
+          "mes": -1.19
         },
         {
           "afp": "Uno",
-          "anio": -5.76,
-          "mes": -1.63
+          "anio": -5.64,
+          "mes": -1.22
         }
       ]
     }

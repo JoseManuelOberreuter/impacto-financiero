@@ -7,7 +7,7 @@ la foto real de ODEPA (ver precios.py) y los termómetros de termometros.py.
 from datetime import date
 
 from app.datos_ejemplo import banco_central as bc
-from app.datos_ejemplo.precios import CANASTA, PRODUCTOS, PRODUCTOS_POR_ID
+from app.datos_ejemplo.precios import CANASTA, PRODUCTOS, PRODUCTOS_POR_ID, con_articulo, es_plural
 from app.datos_ejemplo.termometros import TERMOMETROS, termometro_de_ejemplo
 from app.modelos.home import CambioSemana, Home, Resumen
 from app.modelos.precios import Producto
@@ -90,6 +90,20 @@ def _cambios() -> list[CambioSemana]:
     ]
 
 
+def _titulo() -> str:
+    """Titular del día: cómo se movió la canasta y el alimento que más cambió."""
+    cambio = CANASTA.variacion_semanal
+    if abs(cambio) < 0.5:
+        canasta = "La canasta se mantiene esta semana"
+    else:
+        canasta = f"La canasta {'sube' if cambio > 0 else 'baja'} {bc.pct(abs(cambio))} esta semana"
+    producto = max(PRODUCTOS, key=lambda p: abs(p.variacion_semanal))
+    verbo = "sube" if producto.variacion_semanal > 0 else "baja"
+    if es_plural(producto):
+        verbo += "n"
+    return f"{canasta}; {con_articulo(producto)} {verbo} {bc.pct(abs(producto.variacion_semanal))}."
+
+
 def _texto_resumen() -> str:
     tpm = bc.SERIES["tpm"]
     dolar = bc.SERIES["dolar"]
@@ -106,7 +120,7 @@ def home_de_ejemplo() -> Home:
         generado_el=date(2026, 10, 15),
         datos_de_ejemplo=True,
         resumen=Resumen(
-            titulo="La canasta baja un poco: el pan cae 1 % esta semana.",
+            titulo=_titulo(),
             texto=_texto_resumen(),
         ),
         canasta=CANASTA,

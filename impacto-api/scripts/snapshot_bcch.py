@@ -41,6 +41,7 @@ SERIES = {
     "tasa_hipotecaria": ("F022.VIV.TIP.MA03.UF.Z.D", "Tasa hipotecaria en UF, más de 3 años", "%"),
     "tasa_consumo": ("F022.CON.TIP.Z.NO.Z.D", "Tasa de créditos de consumo", "%"),
     "ipec": ("F089.IPE.IND.75M2.M", "Percepción económica (IPEC)", "puntos"),
+    "imce": ("G089.IME.IND.A0.M", "Confianza empresarial (IMCE)", "puntos"),
     "ipc_esperado_11m": ("F089.IPC.V12.14.M", "Inflación esperada en 11 meses", "%"),
     "tpm_esperada_11m": ("F089.TPM.TAS.14.M", "TPM esperada en 11 meses", "%"),
 }
