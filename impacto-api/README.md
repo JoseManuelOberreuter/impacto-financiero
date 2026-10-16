@@ -44,6 +44,7 @@ En macOS o Linux, usar `.venv/bin/python` en vez de `.venv/Scripts/python`.
 | `CORS_ORIGINS` | Orígenes web permitidos, separados por coma | `http://localhost:8081` |
 | `PORT` | Puerto (lo define Railway) | `8000` |
 | `CACHE_SEGUNDOS` | Segundos que el navegador puede guardar la respuesta (usar `0` en desarrollo) | `300` |
+| `MODO_PLANES` | Cómo se aplican los planes: `abierto`, `vista_previa` o `activo` (ver docs/planes.md) | `abierto` |
 
 Las claves de las fuentes (Banco Central, CMF, CNE y otras) van en un archivo `.env`, que no se sube a GitHub. Copia [.env.example](.env.example) como `.env` y completa las que tengas.
 
@@ -69,6 +70,8 @@ docker run -p 8000:8000 impacto-api
 | GET | `/v1/precios/{id}` | Detalle de un producto: serie, por tipo de local y por región |
 | GET | `/v1/noticias` | Ánimo de la prensa, temas, titulares y hechos esenciales (de ejemplo) |
 | GET | `/v1/herramientas` | Mi AFP, calculadoras, calendario y metodología |
+| GET | `/v1/mi-impacto/referencias` | UF (hoy, última publicada, hace un mes y un año) y bencina (hoy y hace un año) para que la app calcule Mi impacto sin enviar los datos del usuario |
+| GET | `/v1/yo/capacidades` | Modo de los planes y capacidades del usuario (sin cuentas: plan gratis) |
 
 ## Fotos de datos reales (borradores de conectores)
 

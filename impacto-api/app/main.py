@@ -3,7 +3,7 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.v1 import home, secciones
+from app.api.v1 import home, secciones, yo
 
 app = FastAPI(
     title="Impacto Financiero API",
@@ -22,6 +22,7 @@ app.add_middleware(
 
 app.include_router(home.router, prefix="/v1", tags=["home"])
 app.include_router(secciones.router, prefix="/v1")
+app.include_router(yo.router, prefix="/v1")
 
 
 @app.get("/salud", tags=["sistema"])

@@ -68,6 +68,12 @@ class Serie:
 SERIES = {id_: Serie(id_) for id_ in _FOTO["series"]}
 
 
+def ultima_publicada(id_: str) -> tuple[date, float]:
+    """Último valor publicado, aunque sea de una fecha futura (la UF se conoce por adelantado)."""
+    fecha, valor = _FOTO["series"][id_]["observaciones"][-1]
+    return date.fromisoformat(fecha), valor
+
+
 def numero(valor: float, decimales: int = 1) -> str:
     return f"{valor:,.{decimales}f}".replace(",", "_").replace(".", ",").replace("_", ".")
 

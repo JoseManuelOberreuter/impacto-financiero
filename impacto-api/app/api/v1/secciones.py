@@ -1,13 +1,15 @@
-"""Endpoints de las secciones de la app: termómetros, precios, noticias y herramientas."""
+"""Endpoints de las secciones de la app: termómetros, precios, noticias, herramientas y Mi impacto."""
 
 from fastapi import APIRouter, HTTPException, Response
 
 from app.api.v1.home import CACHE_SEGUNDOS
 from app.datos_ejemplo.herramientas import herramientas_de_ejemplo
+from app.datos_ejemplo.mi_impacto import referencias
 from app.datos_ejemplo.noticias import noticias_de_ejemplo
 from app.datos_ejemplo.precios import precios_de_ejemplo, producto_de_ejemplo
 from app.datos_ejemplo.termometros import termometro_de_ejemplo, termometros_de_ejemplo
 from app.modelos.herramientas import Herramientas
+from app.modelos.mi_impacto import ReferenciasMiImpacto
 from app.modelos.noticias import Noticias
 from app.modelos.precios import Precios, Producto
 from app.modelos.termometros import Termometro, TermometroDetalle
@@ -59,3 +61,10 @@ def obtener_noticias(response: Response) -> Noticias:
 def obtener_herramientas(response: Response) -> Herramientas:
     _cache(response)
     return herramientas_de_ejemplo()
+
+
+@router.get("/mi-impacto/referencias", response_model=ReferenciasMiImpacto, tags=["mi impacto"])
+def obtener_referencias_mi_impacto(response: Response) -> ReferenciasMiImpacto:
+    """UF y bencina para que la app calcule el impacto con los datos del usuario, sin enviarlos."""
+    _cache(response)
+    return referencias()
