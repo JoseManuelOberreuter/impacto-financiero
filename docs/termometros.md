@@ -80,7 +80,7 @@ Termómetros
 ### Estilo visual
 
 - **Minimalista y moderno**, inspirado en el **Liquid Glass** de iOS 26: superficies de vidrio sobre un fondo con luces difusas.
-- **Fondo "piedra cálida"** (`#EFEBE4` en claro, `#0E0D0B` en oscuro), con manchas difusas marcadas que le dan personalidad; el azul queda solo en gráficos y acentos. Igual en todas las pestañas. Las otras paletas probadas (verde azulado y piedra fresca) quedaron guardadas en `impacto-app/src/constants/theme.ts`.
+- **Fondo "pizarra azul"** (`#E8ECF2` en claro, `#0A0E16` en oscuro), elegido el 16-oct-2026: azul grisáceo, serio y financiero, con manchas difusas azul acero (claro) y azul marino (oscuro). Igual en todas las pestañas. Las otras paletas probadas (piedra cálida, piedra fresca y verde azulado) quedaron guardadas en `impacto-app/src/constants/theme.ts`.
 - En **iPhone con iOS 26** se usa el vidrio nativo (`expo-glass-effect`). En **web** se imita con desenfoque (`backdrop-filter`). En el resto de las plataformas se usa una superficie translúcida.
 - **Tipografía grande** para el titular y el precio; textos secundarios en gris.
 - **Íconos de Lucide** con el color del nivel de presión. Nunca emojis.
