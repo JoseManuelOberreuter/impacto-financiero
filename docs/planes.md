@@ -1,7 +1,7 @@
 # Planes y capacidades
 
 > Plan general al 15-oct-2026. Todavía no se cobra ni hay empresa (la SpA se crea antes del primer cobro). El objetivo es organizar la data y las secciones desde ya, para que activar el cobro sea cambiar una configuración y no reescribir código.
-> Relacionado: [pendientes-backend.md](pendientes-backend.md), [arquitectura.md](arquitectura.md) y [banco-central-series.md](banco-central-series.md).
+> Relacionado: [plan-pro.md](plan-pro.md) (qué vende el Pro), [riesgos.md](riesgos.md), [pendientes-backend.md](pendientes-backend.md), [arquitectura.md](arquitectura.md) y [banco-central-series.md](banco-central-series.md).
 
 ## 1. Los planes
 
@@ -36,6 +36,7 @@ Así, mover una función de plan, regalarla en una promoción o crear un plan nu
 | `termometro.vivienda` | Termómetro de Vivienda | — | Sí | Sí |
 | `precios.vs_ipc` | Nuestra canasta vs. el IPC de alimentos | — | Sí | Sí |
 | `aviso_bencina` | Estimación de la próxima variación de la bencina | — | Sí | Sí |
+| `mi_impacto` | Mi impacto completo en pesos: bencina, sueldo y AFP (el dividendo es la vista previa gratis). Ver [plan-pro.md](plan-pro.md) | Vista previa | Sí | Sí |
 | `calculadoras.basicas` | Dividendo, crédito y sueldo vs. inflación con tasas reales | Sí | Sí | Sí |
 | `calculadoras.escenarios` | Calculadoras con escenarios de TPM e inflación esperadas | — | Sí | Sí |
 | `alertas` | Avisos de umbrales y publicaciones (con límite) | — | 10 | 50 |
@@ -113,12 +114,15 @@ El endpoint de capacidades devuelve el modo junto con la lista. La app no tiene 
 
 ## 5. En la app
 
-| Pieza | Qué hace |
-|---|---|
-| `useCapacidades()` | Hook que carga `/v1/yo/capacidades` una vez y expone `puede(id)` |
-| `<Capacidad id="expectativas">` | Muestra su contenido si hay acceso; si no, el `BloquePro` |
-| `BloquePro` | Vista previa difuminada con "Disponible en Pro" o "en Empresas" y un botón para conocer el plan |
-| Etiqueta "Pro" | Se muestra en modo `vista_previa` junto a lo que no es gratis |
+| Pieza | Archivo | Qué hace |
+|---|---|---|
+| `ProveedorCapacidades` y `useCapacidades()` | `impacto-app/src/hooks/use-capacidades.tsx` | Carga `/v1/yo/capacidades` una vez al abrir la app y expone `modo`, `puede(id)` y `planMinimo(id)`. Si la API no responde, todo queda abierto: nunca se bloquea a alguien por un error de red |
+| `<Capacidad id="mi_impacto">` | `impacto-app/src/components/capacidad.tsx` | Muestra su contenido si hay acceso; si no, el `BloquePro`. En `vista_previa` agrega la etiqueta del plan |
+| `BloquePro` y `EtiquetaPlan` | `impacto-app/src/components/bloque-pro.tsx` | Tarjeta "Disponible en Pro" con candado y descripción; etiqueta pequeña "Pro". Pendiente: botón para conocer el plan (la puerta falsa de [plan-pro.md](plan-pro.md)) |
+
+**Backend:** el catálogo vive en `impacto-api/app/planes.py` hasta que exista Supabase, con `puede(capacidad, plan)` y `capacidades(plan)`. Sin cuentas, todos son plan gratis.
+
+**Probado el 16-oct-2026:** con `MODO_PLANES=activo`, la parte de bencina de Mi impacto aparece como "Disponible en Pro"; con `abierto` (el valor por defecto), se ve completa.
 
 Las funciones nuevas que salen de las [series del Banco Central](banco-central-series.md) nacen con su capacidad:
 - capa Pro de los termómetros;
@@ -131,8 +135,8 @@ Las funciones nuevas que salen de las [series del Banco Central](banco-central-s
 
 | Paso | Qué | ¿Necesita cuentas o empresa? |
 |---|---|---|
-| 1 | Catálogo de capacidades en el backend, `MODO_PLANES=abierto`, endpoint `/v1/yo/capacidades` y recorte en la API | No |
-| 2 | `useCapacidades`, `<Capacidad>` y `BloquePro` en la app | No |
+| 1 | ✅ Catálogo de capacidades en el backend, `MODO_PLANES=abierto` y endpoint `/v1/yo/capacidades` (16-oct-2026). Falta el recorte en la API cuando exista contenido Pro en las respuestas (por ejemplo, `historia.larga`) | No |
+| 2 | ✅ `useCapacidades`, `<Capacidad>` y `BloquePro` en la app (16-oct-2026) | No |
 | 3 | Construir cada función nueva ya etiquetada con su capacidad | No |
 | 4 | Tablas de planes y capacidades en Supabase; registro de `uso_capacidades` | No |
 | 5 | Cuentas (Supabase Auth), tabla `suscripciones` y modo `vista_previa` | Cuentas |
