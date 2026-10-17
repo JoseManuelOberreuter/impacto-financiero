@@ -72,7 +72,11 @@ docker run -p 8000:8000 impacto-api
 | GET | `/v1/herramientas` | Mi AFP, calculadoras, calendario y metodología |
 | GET | `/v1/datos` | Todos los datos con su último movimiento, presión, tema, efecto y tono, ordenados por presión |
 | GET | `/v1/mi-impacto/referencias` | UF (hoy, última publicada, hace un mes y un año) y bencina (hoy y hace un año) para que la app calcule Mi impacto sin enviar los datos del usuario |
-| GET | `/v1/yo/capacidades` | Modo de los planes y capacidades del usuario (sin cuentas: plan gratis) |
+| GET | `/v1/yo/capacidades` | Modo de los planes y capacidades del usuario (sin sesión: plan gratis) |
+| GET | `/v1/yo` | Datos de la cuenta: correo, nombre, verificado y plan (requiere sesión) |
+| GET | `/v1/yo/preferencias` | Datos anclados, apariencia y Mi impacto guardados en la cuenta (requiere sesión) |
+| PUT | `/v1/yo/preferencias` | Guarda las preferencias de la cuenta (requiere sesión) |
+| DELETE | `/v1/yo` | Borra la cuenta y sus datos (requiere sesión) |
 
 ## Fotos de datos reales (borradores de conectores)
 

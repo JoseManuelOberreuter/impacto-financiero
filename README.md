@@ -101,6 +101,7 @@ Cada directorio tiene su README con las instrucciones para correrlo en local.
 | [docs/investigacion-fuentes-ampliadas.md](docs/investigacion-fuentes-ampliadas.md) | Más fuentes chilenas e internacionales, datos propios que salen de cruzarlas y tabla maestra de fuentes |
 | [docs/banco-central-series.md](docs/banco-central-series.md) | Códigos de las series del Banco Central por termómetro, cómo usar su API y datos propios que salen de cruzarlas |
 | [docs/planes.md](docs/planes.md) | Planes Gratis, Pro y Empresas, capacidades por plan, modos de activación y tablas de la base |
+| [docs/cuentas.md](docs/cuentas.md) | Cuentas opcionales con Supabase Auth: registro, verificación, recuperación, reglas de contraseña y configuración del panel |
 | [docs/plan-pro.md](docs/plan-pro.md) | Qué vende el plan Pro (Mi impacto, lo que viene, cruces y alertas), qué queda gratis y cómo validarlo |
 | [docs/riesgos.md](docs/riesgos.md) | Bloqueantes y riesgos legales, técnicos y de negocio, y cuándo atenderlos |
 | [docs/pendientes-backend.md](docs/pendientes-backend.md) | Lista de pendientes del backend: claves, base de datos, conectores, cálculos y noticias |

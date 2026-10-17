@@ -73,7 +73,7 @@ Termómetros
 
 - **Lo que más le gustó al usuario:** el titular grande, que haya gráficos y las flechas de "lo que cambió".
 - **Selector de país:** bandera de Chile dibujada (no emoji), fija en la esquina superior derecha de toda la app, igual que el aviso de "Datos de ejemplo" (`components/selector-pais.tsx`, puesto en `app/_layout.tsx`). Al tocarla muestra "Chile" marcado y "Próximamente más países".
-- **Marca "Impacto Financiero":** en la web, desde 1.100 px de ancho, va fija arriba a la izquierda, fuera del menú y a la altura de la bandera (`components/app-tabs.web.tsx`); el menú tiene el ancho del contenido y sus 5 secciones quedan centradas. Entre 768 y 1.100 px la marca vuelve a la izquierda dentro del menú, para que no choquen.
+- **Marca "Impacto Financiero":** en la web, desde 1.100 px de ancho, el menú va arriba y la marca fija arriba a la izquierda, fuera del menú y a la altura de la bandera (`components/app-tabs.web.tsx`); el menú tiene el ancho del contenido y sus 5 secciones quedan centradas. Más angosto, el menú va abajo como en el celular, para que no choque con la marca ni con la burbuja de cuenta y la bandera.
 - **Encabezado del Inicio:** en escritorio, "Hoy en Chile" va en la misma fila que la fecha; en el teléfono, la fila lleva "Impacto Financiero" y la fecha (con espacio para la bandera), y "Hoy en Chile" queda sobre el titular.
 - **Impacto Financiero** (desde el 16-oct-2026): reemplaza a la tarjeta de la canasta como protagonista del Inicio. En el Inicio va solo la cifra (cuánto más le cuesta la vida a un hogar típico de Santiago que hace un año); el detalle por rubro y "Calcular el mío" están en su termómetro (`/termometros/impacto`). Metodología: [impacto-financiero.md](impacto-financiero.md).
 - **"Lo que cambió esta semana"** (`cambios` en `GET /v1/home`): **los datos anclados por el usuario van siempre primero** (con un pin junto al nombre), y el resto lo completa **lo que más se movió**. Código: `_candidatos` y `_cambios` en `impacto-api/app/datos_ejemplo/home.py`.
@@ -116,7 +116,7 @@ Termómetros
 | Precios | `/precios` | Canasta (total, evolución y en qué se va), productos por categoría, energía y transporte |
 | ↳ Detalle | `/precios/[id]` | Precio, 12 semanas, dónde se compra (tipo de local) y comparación por región |
 | Noticias | `/noticias` | Ánimo de la semana (tono, incertidumbre), temas que dominan con titulares, hechos esenciales |
-| Herramientas | `/herramientas` | Mi AFP (rentabilidad por fondo y AFP), calculadoras (pronto), calendario económico, metodología y Ajustes (apariencia: automático, claro u oscuro) |
+| Herramientas | `/herramientas` | Mi AFP (rentabilidad por fondo y AFP), calculadoras (pronto), calendario económico y metodología. La apariencia (automático, claro u oscuro) está en Mi cuenta |
 
 **Datos reales y de ejemplo en estas páginas:**
 - **Reales**, como foto fija:
