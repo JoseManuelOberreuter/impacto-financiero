@@ -84,19 +84,12 @@ Termómetros
   - **Datos mensuales** (IPC, desempleo, IMACEC, IPEC, IMCE): entran solo si su último cambio fue inusual (movimiento ≥ 1); si no, aparecerían todo el mes con el mismo cambio. **Pendiente:** que entren la semana en que se publican, cuando guardemos su fecha de publicación.
   - **Alimentos:** su historia es de 12 semanas (ODEPA), así que su "lo habitual" es menos preciso hasta guardar más.
   - **Bencina:** se compara con el último mes con dato de la CNE hasta guardar el precio diario.
-  - **Colores (desde el 16-oct-2026):** cada fila separa dos ideas.
-    - **Flecha y su color = si el movimiento conviene al bolsillo:** verde si conviene, rojo si no, gris si depende de quién seas o si no se movió (campo `tono`).
-    - **Presión = texto** bajo el mini gráfico ("Presión alta"), con su color, **solo en "Todos los datos"**. En el Inicio no se muestra, porque casi todos los que entran tienen presión alta.
-    - **Mini gráfico** en azul, neutro.
-    - **Qué es "bueno" para cada dato** (campo `efecto`):
-
-      | Si sube, para el bolsillo es… | Datos |
-      |---|---|
-      | Malo (`sube_malo`) | Bencina, gas, alimentos, UF, tasas de crédito, tasa máxima, TPM, IPC, desempleo |
-      | Bueno (`sube_bueno`) | IMACEC, percepción de las personas, confianza de las empresas |
-      | Neutro (`neutro`) | Dólar, cobre, petróleo: perjudican a unos y benefician a otros |
+  - **Colores (desde el 16-oct-2026), como en cualquier app de activos:** la flecha y el mini gráfico son **verdes si el dato subió, rojos si bajó y grises si no se movió**. No dicen si conviene o no: solo la dirección.
+  - **Comparado con lo normal, en palabras:** bajo el gráfico, una frase simple como "Más cara que lo normal", "Normal" o "Más baja que lo normal" (campo `estado`). "Lo normal" es el rango de los últimos 5 años (percentiles 20 a 80). Las frases están en `impacto-api/app/calculos/estado.py`, con el género y número de cada dato ("Más caros que lo normal" para los huevos).
+  - **La palabra "presión" ya no se muestra** (se probó y no se entendía). Por dentro se sigue calculando: ordena los datos y define la frase. En los indicadores invertidos (IMACEC, cobre, percepción y confianza) la frase se da vuelta: un IMACEC con presión alta "Crece menos que lo normal".
+  - El campo `efecto` (si que suba es bueno o malo para el bolsillo) y `tono` siguen en la API, pero ya no colorean nada.
 - **Anclados:** el usuario ancla datos desde "Todos los datos"; se guardan en el dispositivo (`hooks/use-anclados.tsx`) y la app los manda a `GET /v1/home?anclados=dolar,uf`. Van primero, en el orden en que se anclaron, y cuentan dentro de las 7 filas. Límite: **3 en el plan gratis**, sin límite en Pro (capacidad `datos.anclados`).
-- **"Todos los datos"** (`/termometros/datos`, `GET /v1/datos`): los 24 datos (incluidos los 10 alimentos de ODEPA), y cuatro formas de ordenarlos: **Más presión** (la de entrada), **Menos presión**, **Me convienen** y **No me convienen**. Siempre se ven los 24: cada opción solo cambia el orden (se probaron filtros que escondían datos y confundían). Cada fila tiene el botón para anclar. Se llega desde "Ver todos los datos" bajo la lista del Inicio y desde el primer elemento de la pestaña Termómetros. Ahí los anclados no cambian el orden.
+- **"Todos los datos"** (`/termometros/datos`, `GET /v1/datos`): los 24 datos (incluidos los 10 alimentos de ODEPA), y tres formas de ordenarlos: **Lo que más se movió** (la de entrada), **Sobre lo normal** y **Bajo lo normal** (campo `nivel`). Siempre se ven los 24: cada opción solo cambia el orden (se probaron filtros que escondían datos y confundían). Cada fila tiene el botón para anclar. Se llega desde "Ver todos los datos" bajo la lista del Inicio y desde el primer elemento de la pestaña Termómetros. Ahí los anclados no cambian el orden.
   - **Enlace:** cada fila lleva a su detalle.
 - **Descartados:** el panel de presión como protagonista (B) y el carrusel tipo historias (D).
 - **Mi AFP** no está en el Inicio por ahora, para no sobrecargarlo.
@@ -160,6 +153,10 @@ Canasta: $48.300 (+0,7 % semanal)
 "Subieron el pan y la bencina; bajó el pollo."
 Dato al 9-oct · próxima actualización 16-oct
 ```
+
+## Cómo se muestra el estado (desde el 16-oct-2026)
+
+**Termómetros en palabras:** cada termómetro dice su estado con una frase propia en vez de "Presión alta/media/baja": "La vida está más cara que lo normal", "Créditos normales", "Más débil que lo normal", "Dólar más caro que lo normal", "Más pesimistas que lo normal", etc. (`estado.del_termometro`). La flecha de tendencia va en verde si sube y en rojo si baja. Debajo se documenta la regla de cálculo, que sigue igual.
 
 ## Estado de presión
 
