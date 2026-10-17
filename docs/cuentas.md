@@ -70,15 +70,19 @@ Panel de Supabase → proyecto **impacto-financiero**:
 
 ## Correos (plantillas en español)
 
-| Correo | Asunto | Texto del botón |
-|---|---|---|
-| Confirmar cuenta | Confirma tu cuenta de Impacto Financiero | Confirmar mi correo |
-| Restablecer contraseña | Restablece tu contraseña | Elegir una nueva contraseña |
-| Cambio de correo | Confirma tu nuevo correo | Confirmar el cambio |
+Salen por SMTP propio: el Gmail `impacto.financiero.app@gmail.com` con una contraseña de aplicación, configurado en **Authentication → Emails → SMTP Settings** (puerto 465, remitente "Impacto Financiero"). Gmail permite ~500 correos al día; Supabase limita a ~30 por hora con SMTP propio (se ajusta en Authentication → Rate Limits). Con dominio propio se cambia a Resend o Brevo sin tocar código.
+
+Las plantillas HTML están en `impacto-api/db/correos/` (tablas y estilos en línea para que se vean bien en Gmail, Outlook y el celular; sin imágenes). Se pegan en **Authentication → Emails → Templates**: el asunto va en el campo *Subject* (también está en un comentario al inicio de cada archivo) y el HTML completo en *Body*.
+
+| Plantilla de Supabase | Archivo | Asunto | Botón |
+|---|---|---|---|
+| Confirm signup | `confirmar-cuenta.html` | Confirma tu cuenta de Impacto Financiero | Confirmar mi correo |
+| Reset password | `restablecer-contrasena.html` | Restablece tu contraseña de Impacto Financiero | Elegir una nueva contraseña |
+| Change email address | `cambio-de-correo.html` | Confirma tu nuevo correo en Impacto Financiero | Confirmar el cambio |
 
 ## Pendiente
 
 - Probar el flujo completo con un correo real (crear, verificar, entrar, recuperar, borrar).
-- Producción: dominio, Resend, plantillas con la marca, contraseñas filtradas y CAPTCHA.
+- Producción: dominio y Resend (para que los correos salgan del dominio), contraseñas filtradas y CAPTCHA.
 - Google y Apple.
 - Alertas y plan Pro sobre la cuenta.
