@@ -12,7 +12,7 @@
 | **CMF** | Tasa máxima convencional (TMC) por tramo, 6 años | API REST | `CMF_API_KEY` | `scripts/snapshot_cmf.py` | `cmf_snapshot.json` | 15-oct-2026 |
 | **ODEPA** | Precios al consumidor de 10 alimentos, por semana, región y tipo de local | CSV de datos abiertos (se descarga a mano) | No | `scripts/snapshot_odepa.py` | `odepa_snapshot.json` | Semana del 9-oct-2026 |
 | **Superintendencia de Pensiones** | Valor cuota de las 7 AFP en los fondos A a E | Descarga pública | No | `scripts/snapshot_afp.py` | `afp_snapshot.json` | Dato al 14-oct-2026 |
-| **INE: IX Encuesta de Presupuestos Familiares** | Gasto promedio de los hogares y su reparto por rubro (oct-2021 a sep-2022) | Publicaciones y bases de datos del INE | No | (a mano; ver sección 4) | `epf_ix.json` | Publicada el 26-oct-2023 |
+| **INE: IX Encuesta de Presupuestos Familiares** | Gasto promedio de los hogares y su reparto por rubro y producto (oct-2021 a sep-2022) | Publicaciones y bases de datos (CSV) del INE | No | `scripts/resumen_epf.py` (ver sección 4) | `epf_ix.json` | Publicada el 26-oct-2023; microdatos procesados el 16-oct-2026 |
 | **Panel de Expertos del Transporte Público** | Tarifa del Metro | Resolución publicada | No | (a mano) | En el código (`precios.py`) | Tarifa vigente desde el 22-feb-2026 |
 
 **Cómo actualizar todo** (desde `impacto-api/`):
@@ -44,7 +44,7 @@ ODEPA necesita primero descargar el CSV del año desde datos.odepa.gob.cl (ver e
 | Fecha del encabezado | Servidor | `date.today()` | — |
 | Titular del día | ODEPA | Canasta y alimento que más se movió | Propio: texto generado con los datos (`home.py`, `_titulo`) |
 | Frase de la tasa y el dólar | Banco Central | `F022.TPM.TIN.D001.NO.Z.D`, `F073.TCO.PRE.Z.D` | Variación del dólar en 7 días |
-| **Impacto Financiero** | INE (EPF) y Banco Central (IPC) | `epf_ix.json`; `G073.IPC.IND.2023.M`, `F074.IPC.IND.DIV10000/40000/70000.2023.C.M` | Propio: [impacto-financiero.md](impacto-financiero.md) |
+| **Impacto Financiero** | INE (EPF) y Banco Central (IPC) | `epf_ix.json`; `G073.IPC.IND.2023.M`, `F074.IPC.IND.DIV10000/40000/70000.2023.C.M`; bencina (CNE) y UF a diario | Propio: [impacto-financiero.md](impacto-financiero.md) |
 | Lo que cambió esta semana | Banco Central, CNE, CMF, ODEPA | Los 15 candidatos de `home.py` (`_candidatos`) | Propio: elige los que más presionan ([termometros.md](termometros.md)) |
 | Termómetros | Ver la sección Termómetros | | |
 
@@ -123,6 +123,16 @@ La **presión** de cada indicador es un cálculo propio: percentiles 20 y 80 de 
 | Base Cantidades IX EPF (CSV) | 212 MB | Cantidades compradas (por ejemplo, kilos de pan o litros de bencina) |
 | CCIF IX EPF (CSV) | 140 KB | Clasificación de productos (divisiones, grupos y subclases) |
 
-Son demasiado grandes para el repositorio: la idea es descargarlas a una carpeta local ignorada por git, procesarlas con un script y guardar en el repo solo el resumen (por ejemplo, el gasto del Gran Santiago por subclase). Pendiente de decidir y hacer.
+Son demasiado grandes para el repositorio. **Hecho el 16-oct-2026:** la base de gastos y la CCIF se descargaron a `impacto-api/.cache/epf/` (ignorada por git) y `scripts/resumen_epf.py` guarda en `epf_ix.json` (clave `gran_santiago_microdatos`) el resumen del Gran Santiago:
+- gasto promedio por división (13 rubros), que coincide con lo publicado por el INE;
+- gasto en los productos que seguimos con datos frecuentes: gasolina, diésel, gas, electricidad, arriendo, transporte público y los 9 alimentos de ODEPA.
+
+Criterios verificados: la **macrozona 2 es el Gran Santiago** (1 norte, 3 centro, 4 sur) y el INE **excluye los arriendos imputados** (CCIF 04.2) de sus promedios publicados.
+
+Para regenerarlo (desde `impacto-api/`, con el CSV en `.cache/epf/gastos.csv`):
+
+```bash
+.venv/Scripts/python scripts/resumen_epf.py .cache/epf/gastos.csv app/datos_ejemplo/epf_ix.json
+```
 
 **Próxima edición:** la X EPF se levanta entre septiembre de 2026 y agosto de 2027; sus resultados reemplazarán a los de la IX.
