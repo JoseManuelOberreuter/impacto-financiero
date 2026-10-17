@@ -11,7 +11,7 @@ type Props = {
   titulo: string;
   bajada?: string;
   /** Ruta a la que vuelve si no hay historial (por ejemplo, al abrir el enlace directo). */
-  volverA?: '/termometros' | '/precios';
+  volverA?: '/' | '/termometros' | '/precios' | '/herramientas' | '/cuenta';
   extra?: ReactNode;
 };
 

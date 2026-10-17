@@ -12,7 +12,6 @@ import { ThemedText } from '@/components/themed-text';
 import { Vidrio } from '@/components/vidrio';
 import { Spacing } from '@/constants/theme';
 import { useApi } from '@/hooks/use-api';
-import { usePreferenciaTema, type PreferenciaTema } from '@/hooks/use-preferencia-tema';
 import { useTheme } from '@/hooks/use-theme';
 import { fechaCorta } from '@/utils/fechas';
 import { porcentaje } from '@/utils/numeros';
@@ -22,7 +21,7 @@ export default function HerramientasScreen() {
 
   return (
     <Pagina>
-      <Encabezado titulo="Herramientas" bajada="Tu impacto en pesos, tu AFP, calculadoras, el calendario de datos y ajustes." />
+      <Encabezado titulo="Herramientas" bajada="Tu impacto en pesos, tu AFP, calculadoras y el calendario de datos." />
       <ContenidoApi estado={estado} recargar={recargar}>
         {(h) => <Contenido herramientas={h} />}
       </ContenidoApi>
@@ -80,37 +79,7 @@ function Contenido({ herramientas: h }: { herramientas: Herramientas }) {
         </Vidrio>
       </Seccion>
 
-      <Ajustes />
     </>
-  );
-}
-
-const OPCIONES_TEMA: { valor: PreferenciaTema; etiqueta: string }[] = [
-  { valor: 'automatico', etiqueta: 'Automático' },
-  { valor: 'claro', etiqueta: 'Claro' },
-  { valor: 'oscuro', etiqueta: 'Oscuro' },
-];
-
-function Ajustes() {
-  const { preferencia, cambiarPreferencia } = usePreferenciaTema();
-
-  return (
-    <Seccion titulo="Ajustes">
-      <Vidrio style={styles.tarjeta}>
-        <View style={styles.metodo}>
-          <ThemedText type="smallBold">Apariencia</ThemedText>
-          <ThemedText type="small" themeColor="textSecondary">
-            Automático usa el modo claro u oscuro de tu dispositivo.
-          </ThemedText>
-        </View>
-        <SelectorSegmentado
-          opciones={OPCIONES_TEMA}
-          valor={preferencia}
-          onCambiar={cambiarPreferencia}
-          etiquetaAccesible="Apariencia"
-        />
-      </Vidrio>
-    </Seccion>
   );
 }
 

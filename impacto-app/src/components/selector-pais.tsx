@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Svg, { Polygon, Rect } from 'react-native-svg';
 
+import { BotonCuenta } from '@/components/boton-cuenta';
 import { ThemedText } from '@/components/themed-text';
 import { Vidrio } from '@/components/vidrio';
 import { Spacing } from '@/constants/theme';
@@ -28,7 +29,7 @@ export function BanderaChile({ ancho = 22 }: { ancho?: number }) {
 }
 
 /**
- * Selector de país fijo en la esquina superior derecha, como el aviso de "datos de ejemplo":
+ * Selector de país fijo en la esquina superior derecha, con la burbuja de cuenta a su izquierda,, como el aviso de "datos de ejemplo":
  * por ahora solo Chile, con aviso de que vendrán más. Va en src/app/_layout.tsx.
  */
 export function SelectorPais() {
@@ -39,15 +40,18 @@ export function SelectorPais() {
 
   return (
     <View style={[styles.contenedor, { top: esWeb ? Spacing.three : top + Spacing.two }]}>
-      <Pressable
-        onPress={() => setAbierto((a) => !a)}
-        accessibilityRole="button"
-        accessibilityLabel="País: Chile"
-        accessibilityState={{ expanded: abierto }}
-        style={styles.boton}>
-        <BanderaChile />
-        <ChevronDown size={14} color={theme.textSecondary} strokeWidth={2} />
-      </Pressable>
+      <View style={styles.fila}>
+        <BotonCuenta />
+        <Pressable
+          onPress={() => setAbierto((a) => !a)}
+          accessibilityRole="button"
+          accessibilityLabel="País: Chile"
+          accessibilityState={{ expanded: abierto }}
+          style={styles.boton}>
+          <BanderaChile />
+          <ChevronDown size={14} color={theme.textSecondary} strokeWidth={2} />
+        </Pressable>
+      </View>
 
       {abierto && (
         <Vidrio style={[styles.menu, { backgroundColor: theme.backgroundElement }]}>
@@ -73,6 +77,11 @@ const styles = StyleSheet.create({
     right: Spacing.three,
     zIndex: 20,
     alignItems: 'flex-end',
+  },
+  fila: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
   },
   boton: {
     flexDirection: 'row',

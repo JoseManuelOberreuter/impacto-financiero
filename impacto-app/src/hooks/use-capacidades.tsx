@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 
 import { obtener } from '@/api/cliente';
 import type { Capacidades, ModoPlanes, Plan } from '@/api/tipos';
+import { useSesion } from '@/hooks/use-sesion';
 
 type ValorContexto = {
   modo: ModoPlanes;
@@ -24,12 +25,13 @@ const ABIERTO: ValorContexto = {
 
 const Contexto = createContext<ValorContexto>(ABIERTO);
 
-/** Pide las capacidades una vez al abrir la app (GET /v1/yo/capacidades). */
+/** Pide las capacidades al abrir la app y cada vez que se inicia o cierra sesión. */
 export function ProveedorCapacidades({ children }: { children: ReactNode }) {
+  const { token } = useSesion();
   const [valor, setValor] = useState<ValorContexto>(ABIERTO);
 
   useEffect(() => {
-    obtener<Capacidades>('/yo/capacidades')
+    obtener<Capacidades>('/yo/capacidades', token)
       .then((datos) =>
         setValor({
           modo: datos.modo,
@@ -39,7 +41,7 @@ export function ProveedorCapacidades({ children }: { children: ReactNode }) {
         }),
       )
       .catch(() => {});
-  }, []);
+  }, [token]);
 
   return <Contexto.Provider value={valor}>{children}</Contexto.Provider>;
 }
