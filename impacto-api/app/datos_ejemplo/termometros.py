@@ -357,7 +357,7 @@ TERMOMETROS = [
         tendencia=bc.tendencia(_IMPACTO.diferencia_mensual, 0),
         dato_clave=f"{_signo_pesos(_IMPACTO.diferencia_anual)} al mes que hace un año",
         frase=_texto_impacto(),
-        dato_al=bc.fin_de_mes(_IMPACTO.periodo),
+        dato_al=_IMPACTO.actualizado_al,
         proxima_actualizacion=None,
         fuentes=["INE", "Banco Central"],
     ),

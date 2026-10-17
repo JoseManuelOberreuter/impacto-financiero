@@ -1,6 +1,9 @@
 {
   "fuente": "INE, IX Encuesta de Presupuestos Familiares (EPF)",
-  "periodo": {"desde": "2021-10-01", "hasta": "2022-09-30"},
+  "periodo": {
+    "desde": "2021-10-01",
+    "hasta": "2022-09-30"
+  },
   "publicada": "2023-10-26",
   "cobertura": "Hogares urbanos de las capitales regionales y sus zonas conurbadas: 15.134 hogares de 79 comunas de las 16 regiones",
   "gasto_mensual_promedio": {
@@ -10,10 +13,18 @@
     "macrozona_centro": 1254635,
     "macrozona_sur": 1247895
   },
-  "gasto_mensual_mediano": {"gran_santiago": 1204455},
-  "gasto_per_capita_promedio": {"total_capitales_regionales": 564680},
-  "ingreso_promedio_hogar": {"total_capitales_regionales": 1413349},
-  "gasto_alimentos_promedio_hogar": {"total_capitales_regionales": 307947},
+  "gasto_mensual_mediano": {
+    "gran_santiago": 1204455
+  },
+  "gasto_per_capita_promedio": {
+    "total_capitales_regionales": 564680
+  },
+  "ingreso_promedio_hogar": {
+    "total_capitales_regionales": 1413349
+  },
+  "gasto_alimentos_promedio_hogar": {
+    "total_capitales_regionales": 307947
+  },
   "estructura_gasto_por_division": {
     "nota": "Porcentaje del gasto de los hogares de las capitales regionales (no solo Gran Santiago). Suma 99,9 % por redondeo.",
     "alimentos_y_bebidas_no_alcoholicas": 21.2,
@@ -42,5 +53,173 @@
       "ccif": "https://www.ine.gob.cl/docs/default-source/encuesta-de-presupuestos-familiares/bbdd/ix-epf-(octubre-2021---septiembre-2022)/ccif-ix-epf-(formato-csv).csv"
     }
   },
-  "proxima_edicion": "X EPF: recolección de septiembre de 2026 a agosto de 2027"
+  "proxima_edicion": "X EPF: recolección de septiembre de 2026 a agosto de 2027",
+  "gran_santiago_microdatos": {
+    "nota": "Calculado con scripts/resumen_epf.py sobre la base de gastos de la IX EPF. Gran Santiago (macrozona 2), sin arriendos imputados, ponderado por el factor de expansión. Montos en pesos de oct-2021 a sep-2022 por hogar y por mes.",
+    "hogares_expandidos": 2492868,
+    "gasto_promedio": 1590105,
+    "divisiones": {
+      "01": {
+        "nombre": "Alimentos y bebidas no alcohólicas",
+        "gasto": 324193,
+        "porcentaje": 20.39
+      },
+      "02": {
+        "nombre": "Bebidas alcohólicas y tabaco",
+        "gasto": 23515,
+        "porcentaje": 1.48
+      },
+      "03": {
+        "nombre": "Vestuario y calzado",
+        "gasto": 43975,
+        "porcentaje": 2.77
+      },
+      "04": {
+        "nombre": "Vivienda, agua, electricidad, gas y otros combustibles",
+        "gasto": 259412,
+        "porcentaje": 16.31
+      },
+      "05": {
+        "nombre": "Muebles y mantención del hogar",
+        "gasto": 96274,
+        "porcentaje": 6.05
+      },
+      "06": {
+        "nombre": "Salud",
+        "gasto": 129555,
+        "porcentaje": 8.15
+      },
+      "07": {
+        "nombre": "Transporte",
+        "gasto": 227028,
+        "porcentaje": 14.28
+      },
+      "08": {
+        "nombre": "Información y comunicaciones",
+        "gasto": 101777,
+        "porcentaje": 6.4
+      },
+      "09": {
+        "nombre": "Recreación, deporte y cultura",
+        "gasto": 71190,
+        "porcentaje": 4.48
+      },
+      "10": {
+        "nombre": "Educación",
+        "gasto": 67861,
+        "porcentaje": 4.27
+      },
+      "11": {
+        "nombre": "Restaurantes y alojamiento",
+        "gasto": 106397,
+        "porcentaje": 6.69
+      },
+      "12": {
+        "nombre": "Seguros y servicios financieros",
+        "gasto": 79056,
+        "porcentaje": 4.97
+      },
+      "13": {
+        "nombre": "Cuidado personal y otros",
+        "gasto": 59872,
+        "porcentaje": 3.77
+      }
+    },
+    "componentes": {
+      "gasolina": {
+        "ccif": [
+          "07.2.2.02"
+        ],
+        "gasto": 48269
+      },
+      "diesel": {
+        "ccif": [
+          "07.2.2.01"
+        ],
+        "gasto": 5186
+      },
+      "gas": {
+        "ccif": [
+          "04.5.2"
+        ],
+        "gasto": 30401
+      },
+      "electricidad": {
+        "ccif": [
+          "04.5.1"
+        ],
+        "gasto": 30297
+      },
+      "arriendo": {
+        "ccif": [
+          "04.1.1"
+        ],
+        "gasto": 113191
+      },
+      "transporte_publico": {
+        "ccif": [
+          "07.3"
+        ],
+        "gasto": 39873
+      },
+      "pan": {
+        "ccif": [
+          "01.1.1.03.01"
+        ],
+        "gasto": 20670
+      },
+      "leche": {
+        "ccif": [
+          "01.1.4.01.01"
+        ],
+        "gasto": 3463
+      },
+      "huevos": {
+        "ccif": [
+          "01.1.4.08.01"
+        ],
+        "gasto": 5986
+      },
+      "aceite": {
+        "ccif": [
+          "01.1.5.01.01"
+        ],
+        "gasto": 4057
+      },
+      "arroz": {
+        "ccif": [
+          "01.1.1.01.01"
+        ],
+        "gasto": 2836
+      },
+      "pollo": {
+        "ccif": [
+          "01.1.2.02.18",
+          "01.1.2.02.19",
+          "01.1.2.02.20",
+          "01.1.2.02.21",
+          "01.1.2.02.22"
+        ],
+        "gasto": 12738
+      },
+      "posta": {
+        "ccif": [
+          "01.1.2.02.04"
+        ],
+        "gasto": 3931
+      },
+      "papa": {
+        "ccif": [
+          "01.1.7.05.01"
+        ],
+        "gasto": 5212
+      },
+      "tomate": {
+        "ccif": [
+          "01.1.7.02.07"
+        ],
+        "gasto": 4579
+      }
+    }
+  }
 }

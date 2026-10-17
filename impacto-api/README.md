@@ -107,6 +107,12 @@ CMF (tasa máxima convencional de los últimos 6 años, en todos sus tramos; usa
 .venv/Scripts/python scripts/snapshot_cmf.py app/datos_ejemplo/cmf_snapshot.json
 ```
 
+INE, Encuesta de Presupuestos Familiares (resumen del Gran Santiago a partir de la base de gastos, descargada a `.cache/epf/`; ver docs/catalogo-de-datos.md):
+
+```bash
+.venv/Scripts/python scripts/resumen_epf.py .cache/epf/gastos.csv app/datos_ejemplo/epf_ix.json
+```
+
 Para buscar otros códigos de serie en el catálogo:
 
 ```bash

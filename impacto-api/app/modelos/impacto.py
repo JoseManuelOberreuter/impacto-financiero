@@ -16,6 +16,9 @@ class RubroImpacto(BaseModel):
 
 class ImpactoFinanciero(BaseModel):
     periodo: date = Field(description="Mes del último IPC publicado")
+    actualizado_al: date = Field(
+        description="Fecha del dato más reciente: la bencina y la UF se actualizan a diario"
+    )
     hogar: str = Field(description="A quién representa el cálculo")
     gasto_mes: int
     diferencia_anual: int
