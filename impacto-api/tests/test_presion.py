@@ -41,3 +41,13 @@ def test_formatos_en_espanol():
     assert bc.tasa(4.25) == "4,25 %"
     assert bc.pesos(41162.73) == "$41.163"
     assert bc.pct(-1.01, signo=True) == "−1,0 %"
+
+
+def test_movimiento_inusual():
+    from app.calculos import movimiento as mov
+
+    historia = [1.0, -1.0, 1.0, -1.0, 1.0, -1.0]
+    assert mov.movimiento(2.0, historia) == 2.0
+    assert mov.movimiento(0.5, historia) == 0.5
+    assert mov.movimiento(5.0, [1.0, 2.0]) == 0.0  # sin historia suficiente
+    assert [round(v, 6) for v in mov.variaciones([100, 110, 99])] == [10.0, -10.0]

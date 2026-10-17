@@ -40,3 +40,37 @@ def test_impacto_financiero_suma_sus_rubros():
     assert sum(r["diferencia_anual"] for r in rubros) == impacto["diferencia_anual"]
     # El gasto de la encuesta (2021-2022) llevado a hoy debe ser mayor que el original.
     assert impacto["gasto_mes"] > 1_590_105
+
+
+def test_anclados_van_primero_en_el_inicio():
+    cambios = cliente.get("/v1/home", params={"anclados": "cobre,huevos,no-existe"}).json()["cambios"]
+    assert [c["id"] for c in cambios[:2]] == ["cobre", "huevos"]
+    assert len(cambios) == 7
+    assert len({c["id"] for c in cambios}) == 7
+
+
+def test_todos_los_datos_ordenados_por_presion():
+    datos = cliente.get("/v1/datos").json()
+    orden = {"alta": 0, "media": 1, "baja": 2}
+    niveles = [orden[d["presion"]] for d in datos]
+    assert niveles == sorted(niveles)
+    # Todos los alimentos de ODEPA, no solo el que más se movió.
+    assert sum(d["tema"] == "alimentos" for d in datos) == 10
+
+
+def test_tono_segun_direccion_y_efecto():
+    datos = {d["id"]: d for d in cliente.get("/v1/datos").json()}
+    for d in datos.values():
+        if d["efecto"] == "neutro" or d["direccion"] == "estable":
+            assert d["tono"] == "neutral"
+        elif (d["direccion"] == "sube") == (d["efecto"] == "sube_bueno"):
+            assert d["tono"] == "favorable"
+        else:
+            assert d["tono"] == "desfavorable"
+    assert datos["dolar"]["efecto"] == "neutro"
+
+
+def test_lo_que_cambio_ordena_por_movimiento():
+    cambios = cliente.get("/v1/home").json()["cambios"]
+    movimientos = [c["movimiento"] for c in cambios]
+    assert movimientos == sorted(movimientos, reverse=True)

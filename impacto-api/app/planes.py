@@ -24,6 +24,8 @@ CATALOGO: dict[str, tuple[Plan, dict[Plan, int] | None]] = {
     "precios.vs_ipc": (Plan.pro, None),
     "aviso_bencina": (Plan.pro, None),
     "mi_impacto": (Plan.pro, None),
+    # Datos anclados arriba en el Inicio: 3 en el plan gratis, sin límite desde Pro.
+    "datos.anclados": (Plan.gratis, {Plan.gratis: 3}),
     "calculadoras.basicas": (Plan.gratis, None),
     "calculadoras.escenarios": (Plan.pro, None),
     "alertas": (Plan.pro, {Plan.pro: 10, Plan.empresas: 50}),

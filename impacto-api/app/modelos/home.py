@@ -2,6 +2,8 @@
 
 from datetime import date
 
+from enum import Enum
+
 from pydantic import BaseModel, Field
 
 from app.modelos.impacto import ImpactoFinanciero
@@ -14,8 +16,24 @@ class Resumen(BaseModel):
     texto: str = Field(description="Bajada con el contexto, en una frase")
 
 
+class Efecto(str, Enum):
+    """Qué significa para el bolsillo que el dato suba (docs/termometros.md)."""
+
+    sube_malo = "sube_malo"
+    sube_bueno = "sube_bueno"
+    neutro = "neutro"
+
+
+class Tono(str, Enum):
+    """Si el último movimiento conviene al bolsillo: colorea la flecha."""
+
+    favorable = "favorable"
+    desfavorable = "desfavorable"
+    neutral = "neutral"
+
+
 class CambioSemana(BaseModel):
-    """Un dato que se movió esta semana, para la lista "Lo que cambió"."""
+    """Un dato con su último movimiento, para "Lo que cambió" y "Todos los datos"."""
 
     id: str
     nombre: str
@@ -24,6 +42,13 @@ class CambioSemana(BaseModel):
     presion: Presion = Field(description="Presión que el cambio pone sobre el bolsillo")
     serie: list[float] = Field(description="Valores recientes para el mini gráfico")
     enlace: str = Field(description="Ruta de la app con el detalle")
+    tema: str = Field(default="otros", description="energia, alimentos, afuera, deudas, precios, empleo o animo")
+    efecto: Efecto = Efecto.neutro
+    tono: Tono = Field(default=Tono.neutral, description="Calculado con la dirección y el efecto")
+    movimiento: float = Field(
+        default=0.0,
+        description="Qué tan inusual fue el último cambio: veces lo que el dato suele moverse",
+    )
 
 
 class Home(BaseModel):

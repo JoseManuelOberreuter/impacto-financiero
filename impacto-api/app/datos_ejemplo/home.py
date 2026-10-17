@@ -9,13 +9,14 @@ la foto real de ODEPA (ver precios.py) y los termómetros de termometros.py.
 from dataclasses import dataclass
 from datetime import date
 
+from app.calculos import movimiento as mov
 from app.calculos.presion import evaluar
 from app.datos_ejemplo import banco_central as bc
-from app.datos_ejemplo import cne
+from app.datos_ejemplo import cmf, cne
 from app.datos_ejemplo.impacto import impacto
-from app.datos_ejemplo.precios import CANASTA, PRODUCTOS, con_articulo, es_plural
+from app.datos_ejemplo.precios import CANASTA, PRODUCTOS, PRODUCTOS_POR_ID, con_articulo, es_plural
 from app.datos_ejemplo.termometros import TERMOMETROS, termometro_de_ejemplo
-from app.modelos.home import CambioSemana, Home, Resumen
+from app.modelos.home import CambioSemana, Efecto, Home, Resumen, Tono
 from app.modelos.precios import Producto
 from app.modelos.termometros import Presion, Tendencia
 
@@ -34,11 +35,92 @@ MAX_CAMBIOS = 7
 MAX_POR_TEMA = 2
 
 
+# Cuántos datos se pueden anclar como máximo en el Inicio (el límite por plan lo da la app).
+MAX_ANCLADOS = 10
+
+# Qué significa que cada dato suba, para el color de la flecha (docs/termometros.md).
+_EFECTO = {
+    "bencina": Efecto.sube_malo, "gas": Efecto.sube_malo, "uf": Efecto.sube_malo,
+    "tmc": Efecto.sube_malo, "tpm": Efecto.sube_malo, "tasa_hipotecaria": Efecto.sube_malo,
+    "ipc_mensual": Efecto.sube_malo, "desempleo": Efecto.sube_malo,
+    "imacec_12m": Efecto.sube_bueno, "ipec": Efecto.sube_bueno, "imce": Efecto.sube_bueno,
+    "dolar": Efecto.neutro, "cobre": Efecto.neutro, "petroleo": Efecto.neutro,
+}
+
+
+def _tono(direccion: Tendencia, efecto: Efecto) -> Tono:
+    if efecto is Efecto.neutro or direccion is Tendencia.estable:
+        return Tono.neutral
+    sube = direccion is Tendencia.sube
+    return Tono.favorable if sube == (efecto is Efecto.sube_bueno) else Tono.desfavorable
+
+
+def _puntos_serie(id_: str) -> list[tuple]:
+    return [(p.fecha, p.valor) for p in bc.SERIES[id_].puntos]
+
+
+def _movimiento(id_: str) -> float:
+    """Movimiento inusual del dato (app/calculos/movimiento.py), con el mismo cambio que muestra la fila."""
+    s = bc.SERIES
+    if id_ in PRODUCTOS_POR_ID:
+        p = PRODUCTOS_POR_ID[id_]
+        return mov.movimiento(p.variacion_semanal, mov.variaciones([x.precio for x in p.serie]))
+    if id_ in ("dolar", "cobre", "petroleo"):
+        clave = "petroleo_wti" if id_ == "petroleo" else id_
+        serie = s[clave]
+        actual = bc.variacion(serie.ultimo.valor, serie.antes_de(7).valor)
+        return mov.movimiento(actual, mov.variaciones(mov.semanal(_puntos_serie(clave))))
+    if id_ == "uf":
+        uf = s["uf"]
+        actual = bc.variacion(uf.ultimo.valor, uf.antes_de(30).valor)
+        return mov.movimiento(actual, mov.variaciones(mov.mensual(_puntos_serie("uf"))))
+    if id_ in ("tpm", "tasa_hipotecaria"):
+        serie = s[id_]
+        dias = 30 if id_ == "tpm" else 28
+        actual = serie.ultimo.valor - serie.antes_de(dias).valor
+        return mov.movimiento(actual, mov.diferencias(mov.mensual(_puntos_serie(id_))))
+    if id_ == "bencina":
+        mensual = [v for _, v in cne.mensual("bencina95")]
+        actual = bc.variacion(cne.hoy("bencina95")["mediana"], mensual[-1])
+        return mov.movimiento(actual, mov.variaciones(mensual))
+    if id_ == "gas":
+        mensual = [v for _, v in cne.mensual("glp15_corriente")]
+        cambios = mov.variaciones(mensual)
+        return mov.movimiento(cambios[-1], cambios)
+    if id_ == "tmc":
+        valores = [v for _, v in cmf.tmc()]
+        return mov.movimiento(valores[-1] - valores[-2], mov.diferencias(valores))
+    if id_ == "ipc_mensual":
+        valores = [p.valor for p in s["ipc_12m"].puntos]
+        return mov.movimiento(valores[-1] - valores[-2], mov.diferencias(valores))
+    if id_ == "desempleo":
+        valores = [p.valor for p in s["desempleo"].puntos]
+        cambios = mov.diferencias(valores, paso=12)
+        return mov.movimiento(cambios[-1], cambios)
+    if id_ in ("imacec_12m", "ipec", "imce"):
+        valores = [p.valor for p in s[id_].puntos]
+        return mov.movimiento(valores[-1] - valores[-2], mov.diferencias(valores))
+    return 0.0
+
+
 @dataclass(frozen=True)
 class Candidato:
     fila: CambioSemana
     tema: str
     mensual: bool = False
+
+    def __post_init__(self) -> None:
+        # Los alimentos (id del producto de ODEPA) suben = malo para el bolsillo.
+        efecto = Efecto.sube_malo if self.tema == "alimentos" else _EFECTO.get(self.fila.id, Efecto.neutro)
+        fila = self.fila.model_copy(
+            update={
+                "tema": self.tema,
+                "efecto": efecto,
+                "tono": _tono(self.fila.direccion, efecto),
+                "movimiento": round(_movimiento(self.fila.id), 2),
+            }
+        )
+        object.__setattr__(self, "fila", fila)
 
 
 def _pesos(valor: float) -> str:
@@ -159,10 +241,14 @@ def _puntos(cambio: float) -> str:
     return f"{signo}{bc.numero(abs(cambio))} en el mes"
 
 
-def _candidatos() -> list[Candidato]:
-    """Todos los datos que pueden entrar a "Lo que cambió esta semana"."""
+def _candidatos(todos_los_alimentos: bool = False) -> list[Candidato]:
+    """Todos los datos que pueden entrar a "Lo que cambió esta semana".
+
+    En el Inicio compite un solo alimento (el que más se movió); en "Todos los datos" van los 10.
+    """
     s = bc.SERIES
-    alimento = max(PRODUCTOS, key=lambda p: abs(p.variacion_semanal))
+    mas_movido = max(PRODUCTOS, key=lambda p: abs(p.variacion_semanal))
+    alimentos = PRODUCTOS if todos_los_alimentos else [mas_movido]
     tpm, hipotecaria = s["tpm"], s["tasa_hipotecaria"]
     desempleo, imacec = s["desempleo"], s["imacec_12m"]
     ipc, ipc_12m = s["ipc_mensual"].ultimo, s["ipc_12m"]
@@ -173,7 +259,7 @@ def _candidatos() -> list[Candidato]:
     return [
         Candidato(_cambio_bencina(), "energia"),
         Candidato(_cambio_gas(), "energia"),
-        Candidato(_cambio_producto(alimento), "alimentos"),
+        *[Candidato(_cambio_producto(p), "alimentos") for p in alimentos],
         Candidato(_cambio_semanal("dolar", "dolar", "Dólar", bc.pesos(s["dolar"].ultimo.valor)), "afuera"),
         Candidato(_cambio_semanal("dolar", "cobre", "Cobre", f"US$ {bc.numero(s['cobre'].ultimo.valor, 2)} la libra"),
                   "afuera"),
@@ -227,32 +313,57 @@ def _candidatos() -> list[Candidato]:
     ]
 
 
-def _cambios() -> list[CambioSemana]:
-    """Los datos que más presionan, de todos los temas.
+_ORDEN_PRESION = {Presion.alta: 0, Presion.media: 1, Presion.baja: 2}
+
+
+def _por_presion(candidatos: list[Candidato]) -> list[Candidato]:
+    """Presión alta primero; en cada nivel, los que se movieron antes que los estables."""
+    return [
+        c for _, c in sorted(
+            enumerate(candidatos),
+            key=lambda par: (_ORDEN_PRESION[par[1].fila.presion], par[1].fila.direccion is Tendencia.estable, par[0]),
+        )
+    ]
+
+
+def todos_los_datos() -> list[CambioSemana]:
+    """Todos los datos, ordenados por presión (pantalla "Todos los datos")."""
+    return [c.fila for c in _por_presion(_candidatos(todos_los_alimentos=True))]
+
+
+# Un dato mensual entra solo si su último cambio fue al menos así de inusual: si no,
+# aparecería todo el mes con el mismo cambio. Pendiente: usar su fecha de publicación.
+MOVIMIENTO_MINIMO_MENSUAL = 1.0
+# Por tema, cuántos datos como máximo (los alimentos ya los resume la canasta).
+_MAX_POR_TEMA = {"alimentos": 1}
+
+
+def _cambios(anclados: list[str] | None = None) -> list[CambioSemana]:
+    """Los anclados por el usuario arriba, y después lo que más se movió.
 
     Reglas (docs/termometros.md):
-    - Todos los candidatos compiten; se muestran hasta MAX_CAMBIOS.
-    - Orden: presión alta primero; en cada nivel, los que se movieron antes que los
-      estables; en empate, el orden de la lista de candidatos.
-    - Máximo MAX_POR_TEMA por tema y un solo alimento (la canasta ya los resume).
-    - Los datos mensuales entran solo con presión alta, porque no cambian cada semana.
-      Cuando guardemos su fecha de publicación, entrarán también la semana en que salen.
+    - Los anclados van siempre primero, en el orden en que se anclaron, y cuentan para MAX_CAMBIOS.
+    - El resto se ordena por movimiento inusual (veces lo habitual), suba o baje.
+    - Máximo MAX_POR_TEMA por tema y un solo alimento.
+    - Los datos mensuales entran solo si su último cambio fue inusual (MOVIMIENTO_MINIMO_MENSUAL).
     """
-    orden = {Presion.alta: 0, Presion.media: 1, Presion.baja: 2}
-    candidatos = [c for c in _candidatos() if not c.mensual or c.fila.presion is Presion.alta]
-    candidatos = sorted(
-        enumerate(candidatos),
-        key=lambda par: (orden[par[1].fila.presion], par[1].fila.direccion is Tendencia.estable, par[0]),
-    )
-    elegidos: list[CambioSemana] = []
+    todos = _candidatos(todos_los_alimentos=True)
+    por_id = {c.fila.id: c for c in todos}
+    elegidos = [por_id[id_].fila for id_ in (anclados or [])[:MAX_ANCLADOS] if id_ in por_id]
+    ya = {f.id for f in elegidos}
+
+    candidatos = [
+        c for c in todos
+        if c.fila.id not in ya and (not c.mensual or c.fila.movimiento >= MOVIMIENTO_MINIMO_MENSUAL)
+    ]
     por_tema: dict[str, int] = {}
-    for _, c in candidatos:
-        if por_tema.get(c.tema, 0) >= MAX_POR_TEMA:
+    for c in sorted(candidatos, key=lambda c: c.fila.movimiento, reverse=True):
+        if len(elegidos) >= MAX_CAMBIOS:
+            break
+        if por_tema.get(c.tema, 0) >= _MAX_POR_TEMA.get(c.tema, MAX_POR_TEMA):
             continue
         por_tema[c.tema] = por_tema.get(c.tema, 0) + 1
         elegidos.append(c.fila)
-        if len(elegidos) == MAX_CAMBIOS:
-            break
     return elegidos
 
 
@@ -281,7 +392,7 @@ def _texto_resumen() -> str:
     )
 
 
-def home_de_ejemplo() -> Home:
+def home_de_ejemplo(anclados: list[str] | None = None) -> Home:
     return Home(
         generado_el=date.today(),
         datos_de_ejemplo=True,
@@ -291,7 +402,7 @@ def home_de_ejemplo() -> Home:
         ),
         impacto=impacto(),
         canasta=CANASTA,
-        cambios=_cambios(),
+        cambios=_cambios(anclados),
         termometros=TERMOMETROS,
         termometros_por_defecto=["bolsillo", "deudas", "ahorro", "actividad"],
         max_termometros_home=4,

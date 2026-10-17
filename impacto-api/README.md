@@ -70,6 +70,7 @@ docker run -p 8000:8000 impacto-api
 | GET | `/v1/precios/{id}` | Detalle de un producto: serie, por tipo de local y por región |
 | GET | `/v1/noticias` | Ánimo de la prensa, temas, titulares y hechos esenciales (de ejemplo) |
 | GET | `/v1/herramientas` | Mi AFP, calculadoras, calendario y metodología |
+| GET | `/v1/datos` | Todos los datos con su último movimiento, presión, tema, efecto y tono, ordenados por presión |
 | GET | `/v1/mi-impacto/referencias` | UF (hoy, última publicada, hace un mes y un año) y bencina (hoy y hace un año) para que la app calcule Mi impacto sin enviar los datos del usuario |
 | GET | `/v1/yo/capacidades` | Modo de los planes y capacidades del usuario (sin cuentas: plan gratis) |
 
