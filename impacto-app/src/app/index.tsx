@@ -1,4 +1,6 @@
-import { StyleSheet, View } from 'react-native';
+import { Link } from 'expo-router';
+import { ChevronRight } from 'lucide-react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import type { Home } from '@/api/tipos';
 import { TarjetaImpacto } from '@/components/impacto-financiero';
@@ -8,13 +10,18 @@ import { Seccion } from '@/components/seccion';
 import { TermometroTile } from '@/components/termometro-tile';
 import { ThemedText } from '@/components/themed-text';
 import { Spacing } from '@/constants/theme';
+import { useAnclados } from '@/hooks/use-anclados';
 import { useApi } from '@/hooks/use-api';
 import { useDiseno } from '@/hooks/use-diseno';
+import { useTheme } from '@/hooks/use-theme';
 import { fechaLarga } from '@/utils/fechas';
 
 // Diseño: propuesta G en Figma ("Impacto Financiero — Inicio (propuestas)").
 export default function InicioScreen() {
-  const { estado, recargar } = useApi<Home>('/home');
+  // Los datos anclados van primero en "Lo que cambió esta semana".
+  const { anclados } = useAnclados();
+  const ruta = anclados.length ? `/home?anclados=${encodeURIComponent(anclados.join(','))}` : '/home';
+  const { estado, recargar } = useApi<Home>(ruta);
 
   return (
     <Pagina>
@@ -26,6 +33,7 @@ export default function InicioScreen() {
 }
 
 function Contenido({ home }: { home: Home }) {
+  const theme = useTheme();
   const { esEscritorio } = useDiseno();
   // La personalización llegará cuando haya base de datos para guardarla.
   const termometros = home.termometros_por_defecto
@@ -66,6 +74,16 @@ function Contenido({ home }: { home: Home }) {
 
       <Seccion titulo="Lo que cambió esta semana">
         <ListaCambios cambios={home.cambios} />
+        <Link href="/termometros/datos" asChild>
+          <Pressable style={styles.verTodos}>
+            <View style={styles.verTodosContenido}>
+              <ThemedText type="smallBold" themeColor="accent">
+                Ver todos los datos
+              </ThemedText>
+              <ChevronRight size={16} color={theme.accent} strokeWidth={2} />
+            </View>
+          </Pressable>
+        </Link>
       </Seccion>
 
       <Seccion titulo="Termómetros">
@@ -102,6 +120,14 @@ const styles = StyleSheet.create({
     lineHeight: 33,
     fontWeight: 600,
     letterSpacing: -0.4,
+  },
+  verTodos: {
+    alignSelf: 'flex-end',
+  },
+  verTodosContenido: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.one,
   },
   grilla: {
     flexDirection: 'row',

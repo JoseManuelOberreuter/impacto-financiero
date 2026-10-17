@@ -1,5 +1,5 @@
 import { Link } from 'expo-router';
-import { ChevronRight } from 'lucide-react-native';
+import { ChevronRight, ListFilter } from 'lucide-react-native';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import type { Termometro } from '@/api/tipos';
@@ -27,6 +27,7 @@ export default function TermometrosScreen() {
       <ContenidoApi estado={estado} recargar={recargar}>
         {(termometros) => (
           <View style={styles.lista}>
+            <EnlaceTodosLosDatos />
             {termometros.map((t) => (
               <TarjetaTermometro key={t.id} termometro={t} />
             ))}
@@ -34,6 +35,32 @@ export default function TermometrosScreen() {
         )}
       </ContenidoApi>
     </Pagina>
+  );
+}
+
+/** Acceso a la lista completa de datos, con filtros y anclados. */
+function EnlaceTodosLosDatos() {
+  const theme = useTheme();
+
+  return (
+    <Link href="/termometros/datos" asChild>
+      <Pressable>
+        <Vidrio style={styles.enlaceDatos}>
+          <View style={[styles.icono, { backgroundColor: theme.backgroundSelected }]}>
+            <ListFilter size={20} color={theme.accent} />
+          </View>
+          <View style={styles.titulos}>
+            <ThemedText type="smallBold" style={styles.nombre}>
+              Todos los datos
+            </ThemedText>
+            <ThemedText type="small" themeColor="textSecondary">
+              Filtra por presión y ancla los que quieres ver primero.
+            </ThemedText>
+          </View>
+          <ChevronRight size={18} color={theme.textSecondary} />
+        </Vidrio>
+      </Pressable>
+    </Link>
   );
 }
 
@@ -78,6 +105,12 @@ function TarjetaTermometro({ termometro }: { termometro: Termometro }) {
 const styles = StyleSheet.create({
   lista: {
     gap: Spacing.three,
+  },
+  enlaceDatos: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.three,
+    padding: Spacing.four,
   },
   tarjeta: {
     padding: Spacing.four,

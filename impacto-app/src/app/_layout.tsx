@@ -4,6 +4,7 @@ import { StyleSheet, View } from 'react-native';
 import AppTabs from '@/components/app-tabs';
 import { AvisoEjemplo } from '@/components/aviso-ejemplo';
 import { SelectorPais } from '@/components/selector-pais';
+import { ProveedorAnclados } from '@/hooks/use-anclados';
 import { ProveedorCapacidades } from '@/hooks/use-capacidades';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { ProveedorTema } from '@/hooks/use-preferencia-tema';
@@ -12,7 +13,9 @@ export default function RootLayout() {
   return (
     <ProveedorTema>
       <ProveedorCapacidades>
-        <Navegacion />
+        <ProveedorAnclados>
+          <Navegacion />
+        </ProveedorAnclados>
       </ProveedorCapacidades>
     </ProveedorTema>
   );

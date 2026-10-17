@@ -140,6 +140,14 @@ export type CambioSemana = {
   serie: number[];
   /** Ruta de la app con el detalle (por ejemplo "/precios/papa"). */
   enlace: string;
+  /** energia, alimentos, afuera, deudas, precios, empleo o animo. */
+  tema: string;
+  /** Qué significa para el bolsillo que el dato suba. */
+  efecto: 'sube_malo' | 'sube_bueno' | 'neutro';
+  /** Si el último movimiento conviene: colorea la flecha. */
+  tono: 'favorable' | 'desfavorable' | 'neutral';
+  /** Qué tan inusual fue el último cambio: veces lo que el dato suele moverse. */
+  movimiento: number;
 };
 
 export type Home = {
