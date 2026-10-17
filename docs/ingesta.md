@@ -49,7 +49,22 @@ Desde `impacto-api/`:
 - Si una fuente falla, las demás siguen. La corrida queda con `estado = 'error'` y el mensaje, y el comando sale con código 1 para que el cron lo marque.
 - Un conector suelto también se puede correr para generar solo el JSON, por ejemplo `python -m app.ingesta.cne app/datos_ejemplo/cne_snapshot.json`.
 
-En Railway va como un servicio cron con la misma imagen de la API y el comando `python -m app.ingesta`, una vez al día (por ejemplo a las 10:00 de Chile, después de que el Banco Central publica el dólar y la UF). Necesita las mismas variables de entorno: las claves de las fuentes y `SUPABASE_URL` y `SUPABASE_SERVICE_ROLE_KEY`.
+### En Railway (desde el 17-oct-2026)
+
+Proyecto `impacto-financiero`, entorno `production`, con dos servicios que se construyen desde `JoseManuelOberreuter/impacto-financiero` (rama `main`, carpeta `/impacto-api`, su Dockerfile). Cada push a `main` que toque `impacto-api/` los vuelve a construir.
+
+| Servicio | Qué hace | Configuración |
+|---|---|---|
+| `api` | La API, siempre encendida | `https://api-production-9df1b.up.railway.app`. Healthcheck en `/salud`; se reinicia si falla (hasta 5 veces) |
+| `ingesta` | `python -m app.ingesta` una vez al día | Cron `0 13 * * *` (13:00 UTC = 10:00 en Chile con horario de verano, 09:00 en invierno). No se reinicia si falla: el error queda en `corridas_ingesta` y en los logs de Railway |
+
+**Variables.** Las claves van una sola vez en las *Shared Variables* del entorno (Project Settings → Shared Variables → Raw Editor) y cada servicio las referencia con `${{shared.NOMBRE}}`:
+
+- Compartidas: `SUPABASE_URL` (ya cargada), `SUPABASE_SERVICE_ROLE_KEY`, `BCCH_TOKEN`, `CNE_EMAIL`, `CNE_PASSWORD` y `CMF_API_KEY`.
+- `api` usa `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` y `CORS_ORIGINS` (por ahora `http://localhost:8081`; agregar la dirección de Vercel cuando se publique la web).
+- `ingesta` usa las seis compartidas.
+
+Sin las claves la API igual funciona, con los JSON de respaldo: `/salud` muestra `"archivo"` en cada fuente.
 
 ## Cómo la API usa las fotos
 
@@ -66,11 +81,12 @@ En Railway va como un servicio cron con la misma imagen de la API y el comando `
 | CNE | 292 | 16.077 | Ok |
 | CMF | 14 | 984 | Ok |
 | ODEPA | 10 | 120 | Ok |
-| Superintendencia de Pensiones | 0 | 0 | Error: su sitio de descargas (`/apps/valoresCuotaFondo/`) redirige al portal y no responde. La API sigue con el respaldo del 14-oct. Reintentar en la próxima corrida |
+| Superintendencia de Pensiones | 0 | 0 | Error: ese sábado el sitio estuvo apagado de 10:00 a 17:00 por un corte de luz programado de ENEL (aviso en su portal), y `/apps/valoresCuotaFondo/` redirigía a la portada. La API siguió con el respaldo del 14-oct |
+
+La primera corrida desde Railway ("Run now", 17-oct-2026 a las 21:06 UTC) trajo las 5 fuentes, incluida la Superintendencia de Pensiones (70 observaciones, dato al 15-oct), y la API publicada se recargó sola en la revisión siguiente.
 
 ## Pendiente
 
-- Programar el cron en Railway (junto con el despliegue de la API).
 - Alerta cuando una fuente falla varios días seguidos (por ahora se ve en `corridas_ingesta`).
 - Guardar los archivos crudos en Supabase Storage para poder reprocesar.
 - Usar la historia guardada para calcular la presión de la bencina, los alimentos y las AFP, que hoy no tienen 5 años de datos diarios.

@@ -37,12 +37,13 @@
   - `noticias`, `clasificaciones_noticias`;
   - `lecturas_termometro`.
 - [ ] **Migraciones** versionadas en el repo del backend.
-- [x] **Worker de ingesta** (`python -m app.ingesta`, [ingesta.md](ingesta.md)). Falta programarlo como cron en Railway.
+- [x] **Worker de ingesta** (`python -m app.ingesta`, [ingesta.md](ingesta.md)), como cron diario en Railway.
 - [x] **Estructura común de conector:** `generar()` (la foto) y `series()` (la historia), con registro en `corridas_ingesta`. Falta: reintentos y alerta si una fuente falla varios días.
 - [ ] **Guardar los archivos crudos** en Supabase Storage para poder reprocesar.
 - [x] **La API lee de la base** (tabla `fotos`) y se recarga sola; si Supabase no responde usa los JSON de respaldo (`FOTOS_DESDE=archivos` para desarrollo sin claves).
 - [ ] **Variables de entorno** para todas las claves; nunca en el código.
-- [ ] Desplegar API + worker en **Railway** y la web en **Vercel**.
+- [x] Desplegar API + worker en **Railway** (17-oct-2026, ver [ingesta.md](ingesta.md)).
+- [ ] Publicar la web en **Vercel** y agregar su dirección a `CORS_ORIGINS`.
 
 ## Fase 2: conectores, por prioridad
 
