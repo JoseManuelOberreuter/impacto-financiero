@@ -1,17 +1,17 @@
 """Datos reales de la CNE, leídos de la foto cne_snapshot.json.
 
-La foto se genera con scripts/snapshot_cne.py. Trae la mediana de hoy en las
+La foto la arma app/ingesta/cne.py y se lee con app/fotos.py (Supabase o el JSON de respaldo). Trae la mediana de hoy en las
 estaciones de servicio (solo precios actualizados hace poco) y la historia
 mensual por región de los combustibles y del gas licuado.
 """
 
-import json
 from datetime import date
-from pathlib import Path
+
+from app import fotos
 
 FUENTE = "CNE"
 REGION_METROPOLITANA = "13"
-_FOTO = json.loads((Path(__file__).parent / "cne_snapshot.json").read_text(encoding="utf-8"))
+_FOTO = fotos.leer("cne")
 DESCARGADO_EL = date.fromisoformat(_FOTO["descargado_el"])
 
 

@@ -1,17 +1,10 @@
-import importlib.util
-from pathlib import Path
-
 from fastapi.testclient import TestClient
 
 from app.datos_ejemplo import cne
+from app.ingesta import cne as snapshot_cne
 from app.main import app
 
 cliente = TestClient(app)
-_spec = importlib.util.spec_from_file_location(
-    "snapshot_cne", Path(__file__).parent.parent / "scripts" / "snapshot_cne.py"
-)
-snapshot_cne = importlib.util.module_from_spec(_spec)
-_spec.loader.exec_module(snapshot_cne)
 
 
 def test_numeros_de_la_cne():

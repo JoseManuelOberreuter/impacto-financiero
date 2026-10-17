@@ -8,11 +8,10 @@ Pendientes: el tono de las noticias (falta la prensa) y la presión de las AFP
 (falta guardar su historia).
 """
 
-import json
 import statistics
 from datetime import date, timedelta
-from pathlib import Path
 
+from app import fotos
 from app.calculos.presion import evaluar, la_mas_alta
 from app.datos_ejemplo import banco_central as bc
 from app.datos_ejemplo import cmf, cne
@@ -31,7 +30,7 @@ from app.modelos.termometros import (
 )
 
 NBSP = " "
-_AFP = json.loads((Path(__file__).parent / "afp_snapshot.json").read_text(encoding="utf-8"))
+_AFP = fotos.leer("afp")
 _FONDOS = {f["fondo"]: f["afps"] for f in _AFP["fondos"]}
 
 

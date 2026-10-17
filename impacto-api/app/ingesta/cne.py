@@ -1,14 +1,14 @@
-"""Genera una foto de los precios de combustibles y gas de la CNE para la API.
+"""Conector de la CNE: precios de combustibles y gas.
 
-Primer borrador del conector de la CNE. Descarga tres cosas:
+Descarga tres cosas:
 - Precios de hoy en las ~1.800 estaciones de servicio: guarda la mediana por
   combustible, en el país y en cada región, solo con las estaciones que
   actualizaron su precio en los últimos días (ver docs/fuentes-de-datos.md).
 - Historia mensual del precio de los combustibles por región (desde 1994).
 - Historia mensual del gas licuado en cilindro por región (desde 2000).
 
-Uso:
-    python scripts/snapshot_cne.py app/datos_ejemplo/cne_snapshot.json
+Uso suelto (solo escribe el JSON):
+    python -m app.ingesta.cne app/datos_ejemplo/cne_snapshot.json
 
 Lee CNE_EMAIL y CNE_PASSWORD (variables de entorno o archivo .env). La API
 entrega un token nuevo en cada inicio de sesión.
@@ -16,7 +16,6 @@ entrega un token nuevo en cada inicio de sesión.
 
 import gzip
 import json
-import os
 import statistics
 import sys
 import urllib.parse
@@ -24,8 +23,12 @@ import urllib.request
 from datetime import date, timedelta
 from pathlib import Path
 
+from app.ingesta import Serie, credencial, region
+
+ID = "cne"
+FUENTE_ID = "cne"
+ARCHIVO = "cne_snapshot.json"
 URL = "https://api.cne.cl"
-RAIZ = Path(__file__).resolve().parent.parent
 REGION_METROPOLITANA = "13"
 # Un precio sin actualizar en estos días se considera viejo y no se usa.
 DIAS_FRESCO = 7
@@ -41,18 +44,6 @@ COMBUSTIBLES_MENSUAL = {
     "petroleo_diesel": "diesel",
     "kerosene_domestico": "parafina",
 }
-
-
-def credencial(nombre: str) -> str:
-    if os.getenv(nombre):
-        return os.environ[nombre]
-    archivo = RAIZ / ".env"
-    if archivo.exists():
-        for linea in archivo.read_text(encoding="utf-8").splitlines():
-            clave, _, valor = linea.partition("=")
-            if clave.strip() == nombre and valor.strip():
-                return valor.strip().strip("\"'")
-    raise SystemExit(f"Falta {nombre} en el entorno o en impacto-api/.env")
 
 
 def pedir(ruta: str, token: str | None = None, datos: dict | None = None):
@@ -129,10 +120,7 @@ def historia_mensual(filas: list[dict], clave_tipo, clave_precio: str, desde: da
     return historia
 
 
-def main() -> None:
-    if len(sys.argv) != 2:
-        raise SystemExit(__doc__)
-    salida = Path(sys.argv[1])
+def generar() -> dict:
     hoy = date.today()
     desde = date(hoy.year - ANIOS_HISTORIA, 1, 1)
 
@@ -154,14 +142,47 @@ def main() -> None:
             glp, lambda f: f"glp{f['tamanio'].split()[0]}_{f['tipo'].lower()}", "precio_pesos", desde
         ),
     }
-    salida.write_text(json.dumps(foto, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
-
     rm = foto["estaciones"]["bencina95"][REGION_METROPOLITANA]
-    print(f"{len(estaciones)} estaciones. Bencina 95 en la RM: ${rm['mediana']:.0f} ({rm['estaciones_frescas']} frescas)")
-    gas = foto["mensual_gas"]["glp15_corriente"][REGION_METROPOLITANA][-1]
-    print(f"Gas 15 kg en la RM: ${gas[1]:.0f} ({gas[0]})")
-    print(f"Guardado en {salida} ({salida.stat().st_size // 1024} KB)")
+    print(f"  {len(estaciones)} estaciones. Bencina 95 en la RM: ${rm['mediana']:.0f} ({rm['estaciones_frescas']} frescas)")
+    return foto
+
+
+def series(foto: dict) -> list[Serie]:
+    """La historia mensual por región y la mediana de hoy en las estaciones.
+
+    La CNE no guarda la historia diaria de las estaciones: se arma aquí, un punto por día de ingesta.
+    """
+    resultado = []
+    for grupo, unidad in (("mensual_combustibles", "$ por litro"), ("mensual_gas", "$ por cilindro")):
+        for id_, regiones in foto[grupo].items():
+            for codigo, observaciones in regiones.items():
+                resultado.append(
+                    Serie(
+                        id=f"cne.{id_}.{region(codigo)}",
+                        nombre=f"{id_}, promedio mensual",
+                        unidad=unidad,
+                        frecuencia="mensual",
+                        region=region(codigo),
+                        observaciones=[(f, v) for f, v in observaciones],
+                    )
+                )
+    for id_, zonas in foto["estaciones"].items():
+        for zona, dato in zonas.items():
+            resultado.append(
+                Serie(
+                    id=f"cne.estaciones.{id_}.{region(zona)}",
+                    nombre=f"{id_}, mediana de las estaciones",
+                    unidad="$ por litro",
+                    frecuencia="diaria",
+                    region=None if zona == "pais" else region(zona),
+                    observaciones=[(foto["descargado_el"], dato["mediana"])],
+                    metadatos={"estaciones_frescas": dato["estaciones_frescas"], "dias_fresco": dato["dias_fresco"]},
+                )
+            )
+    return resultado
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) != 2:
+        raise SystemExit(__doc__)
+    Path(sys.argv[1]).write_text(json.dumps(generar(), ensure_ascii=False, separators=(",", ":")), encoding="utf-8")

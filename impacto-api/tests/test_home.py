@@ -8,7 +8,11 @@ cliente = TestClient(app)
 def test_salud():
     respuesta = cliente.get("/salud")
     assert respuesta.status_code == 200
-    assert respuesta.json() == {"estado": "ok"}
+    datos = respuesta.json()
+    assert datos["estado"] == "ok"
+    # En las pruebas todas las fotos vienen de los JSON de respaldo.
+    assert set(datos["fotos"]) == {"bcch", "cne", "cmf", "odepa", "afp"}
+    assert set(datos["fotos"].values()) == {"archivo"}
 
 
 def test_home_entrega_termometros_por_defecto_validos():

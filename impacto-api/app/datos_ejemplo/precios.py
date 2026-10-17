@@ -1,14 +1,13 @@
 """Precios de ejemplo.
 
 Los alimentos vienen de una foto real de ODEPA (odepa_snapshot.json, generada con
-scripts/snapshot_odepa.py). La bencina y el gas vienen de la foto real de la CNE
+app/ingesta/odepa.py). La bencina y el gas vienen de la foto real de la CNE
 (cne.py). El pasaje de Metro es la tarifa vigente, cargada a mano.
 """
 
-import json
 from datetime import date
-from pathlib import Path
 
+from app import fotos
 from app.datos_ejemplo import cne
 from app.modelos.precios import (
     Canasta,
@@ -19,7 +18,7 @@ from app.modelos.precios import (
     PuntoPrecio,
 )
 
-_SNAPSHOT = json.loads((Path(__file__).parent / "odepa_snapshot.json").read_text(encoding="utf-8"))
+_SNAPSHOT = fotos.leer("odepa")
 
 PRODUCTOS = [Producto(**p, fuente=_SNAPSHOT["fuente"]) for p in _SNAPSHOT["productos"]]
 PRODUCTOS_POR_ID = {p.id: p for p in PRODUCTOS}

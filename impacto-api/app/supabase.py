@@ -13,7 +13,8 @@ import httpx
 _ENV = Path(__file__).resolve().parent.parent / ".env"
 
 
-def _variable(nombre: str) -> str | None:
+def variable(nombre: str) -> str | None:
+    """Lee una variable del entorno o, en desarrollo, de impacto-api/.env."""
     if os.getenv(nombre):
         return os.environ[nombre]
     if _ENV.exists():
@@ -30,7 +31,7 @@ class SinConfiguracion(RuntimeError):
 
 @lru_cache
 def _config() -> tuple[str, str]:
-    url, clave = _variable("SUPABASE_URL"), _variable("SUPABASE_SERVICE_ROLE_KEY")
+    url, clave = variable("SUPABASE_URL"), variable("SUPABASE_SERVICE_ROLE_KEY")
     if not url or not clave:
         raise SinConfiguracion("Faltan SUPABASE_URL o SUPABASE_SERVICE_ROLE_KEY")
     return url.rstrip("/"), clave
@@ -69,6 +70,35 @@ def guardar(tabla: str, fila: dict, conflicto: str) -> dict:
     )
     respuesta.raise_for_status()
     return respuesta.json()[0]
+
+
+def guardar_lote(tabla: str, filas: list[dict], conflicto: str, tamano: int = 1000) -> None:
+    """Upsert de muchas filas, en tandas, sin pedir de vuelta lo guardado."""
+    url, _ = _config()
+    for inicio in range(0, len(filas), tamano):
+        respuesta = httpx.post(
+            f"{url}/rest/v1/{tabla}",
+            params={"on_conflict": conflicto},
+            json=filas[inicio : inicio + tamano],
+            headers={**_cabeceras(), "Prefer": "resolution=merge-duplicates,return=minimal"},
+            timeout=60,
+        )
+        respuesta.raise_for_status()
+
+
+def insertar(tabla: str, fila: dict) -> dict:
+    url, _ = _config()
+    respuesta = httpx.post(
+        f"{url}/rest/v1/{tabla}", json=fila, headers={**_cabeceras(), "Prefer": "return=representation"}, timeout=10
+    )
+    respuesta.raise_for_status()
+    return respuesta.json()[0]
+
+
+def actualizar(tabla: str, filtros: dict[str, str], cambios: dict) -> None:
+    url, _ = _config()
+    respuesta = httpx.patch(f"{url}/rest/v1/{tabla}", params=filtros, json=cambios, headers=_cabeceras(), timeout=10)
+    respuesta.raise_for_status()
 
 
 def borrar_usuario(usuario_id: str) -> None:

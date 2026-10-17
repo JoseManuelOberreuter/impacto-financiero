@@ -1,21 +1,20 @@
 """Datos reales del Banco Central, leídos de la foto bcch_snapshot.json.
 
-La foto se genera con scripts/snapshot_bcch.py. Aquí se arman los indicadores:
+La foto la arma app/ingesta/bcch.py y se lee con app/fotos.py (Supabase o el JSON de respaldo). Aquí se arman los indicadores:
 valor, variación, presión respecto de los últimos 5 años, banda normal y gráfico.
 Cuando exista la base de datos, estas mismas funciones leerán de ahí.
 """
 
-import json
 from dataclasses import dataclass
 from datetime import date, timedelta
-from pathlib import Path
 
+from app import fotos
 from app.calculos.presion import evaluar
 from app.modelos.termometros import Indicador, Presion, PuntoSerie, Tendencia
 
 NBSP = " "
 FUENTE = "Banco Central"
-_FOTO = json.loads((Path(__file__).parent / "bcch_snapshot.json").read_text(encoding="utf-8"))
+_FOTO = fotos.leer("bcch")
 DESCARGADO_EL = date.fromisoformat(_FOTO["descargado_el"])
 
 

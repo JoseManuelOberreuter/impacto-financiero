@@ -1,20 +1,31 @@
-"""Genera una foto (snapshot) de precios al consumidor de ODEPA para la API.
+"""Conector de ODEPA: precios al consumidor de alimentos.
 
-Primer borrador del conector de ODEPA: lee el CSV anual de datos abiertos y
-calcula, por producto, la mediana semanal de la Región Metropolitana, el
+Descarga el CSV anual de datos abiertos (datos.odepa.gob.cl, ~50 MB, se actualiza cada
+semana) y calcula, por producto, la mediana semanal de la Región Metropolitana, el
 desglose por tipo de local y la comparación entre regiones.
 
-Uso:
-    python scripts/snapshot_odepa.py ruta/precio_consumidor_2026.csv app/datos_ejemplo/odepa_snapshot.json
-
-El CSV se descarga desde datos.odepa.gob.cl (ver docs/fuentes-de-datos.md).
+Uso suelto (solo escribe el JSON):
+    python -m app.ingesta.odepa app/datos_ejemplo/odepa_snapshot.json [ruta/precio_consumidor_2026.csv]
 """
 
 import csv
+import io
 import json
 import statistics
 import sys
+import urllib.request
 from collections import defaultdict
+from collections.abc import Iterable
+from datetime import date
+from pathlib import Path
+
+from app.ingesta import Serie
+
+ID = "odepa"
+FUENTE_ID = "odepa"
+ARCHIVO = "odepa_snapshot.json"
+# Conjunto "Precios al Consumidor" en el CKAN de ODEPA: un CSV por año.
+CONJUNTO = "https://datos.odepa.gob.cl/api/3/action/package_show?id=d4646b7f-0d2e-4567-b6fa-932b1a6bb3f3"
 
 REGION_BASE = "13"  # Región Metropolitana
 SEMANAS_SERIE = 12
@@ -44,9 +55,24 @@ def variacion(actual: float, anterior: float) -> float:
     return round((actual / anterior - 1) * 100, 1) if anterior else 0.0
 
 
-def main(ruta_csv: str, ruta_salida: str) -> None:
-    with open(ruta_csv, encoding="utf-8-sig") as archivo:
-        filas = list(csv.DictReader(archivo))
+def url_csv(anio: int) -> str:
+    with urllib.request.urlopen(CONJUNTO, timeout=60) as respuesta:
+        recursos = json.loads(respuesta.read())["result"]["resources"]
+    return next(r["url"] for r in recursos if r["url"].endswith(f"precio_consumidor_{anio}.csv"))
+
+
+def filas_csv(ruta_csv: str | None = None) -> Iterable[dict]:
+    """Lee el CSV fila a fila (de un archivo o descargándolo), sin cargarlo entero en memoria."""
+    if ruta_csv:
+        with open(ruta_csv, encoding="utf-8-sig") as archivo:
+            yield from csv.DictReader(archivo)
+        return
+    with urllib.request.urlopen(url_csv(date.today().year), timeout=300) as respuesta:
+        yield from csv.DictReader(io.TextIOWrapper(respuesta, encoding="utf-8-sig"))
+
+
+def generar(ruta_csv: str | None = None) -> dict:
+    filas = filas_csv(ruta_csv)
 
     # (producto, unidad) → semana → región → [(tipo, precio)]
     datos: dict = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
@@ -114,12 +140,30 @@ def main(ruta_csv: str, ruta_salida: str) -> None:
             }
         )
 
-    with open(ruta_salida, "w", encoding="utf-8") as salida:
-        json.dump({"fuente": "ODEPA", "productos": productos}, salida, ensure_ascii=False, indent=2)
-    print(f"{len(productos)} productos -> {ruta_salida}")
+    if not productos:
+        raise RuntimeError("El CSV de ODEPA no trajo ningún producto")
+    print(f"  {len(productos)} productos, al {max(p['dato_al'] for p in productos)}")
+    return {"fuente": "ODEPA", "descargado_el": date.today().isoformat(), "productos": productos}
+
+
+def series(foto: dict) -> list[Serie]:
+    """Mediana semanal en la Región Metropolitana de cada producto (las últimas semanas de la foto)."""
+    return [
+        Serie(
+            id=f"odepa.{p['id']}",
+            nombre=p["nombre"],
+            unidad=p["unidad"],
+            frecuencia="semanal",
+            region=REGION_BASE,
+            observaciones=[(s["semana"], s["precio"]) for s in p["serie"]],
+            metadatos={"categoria": p["categoria"]},
+        )
+        for p in foto["productos"]
+    ]
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
-        sys.exit(__doc__)
-    main(sys.argv[1], sys.argv[2])
+    if len(sys.argv) not in (2, 3):
+        raise SystemExit(__doc__)
+    foto = generar(sys.argv[2] if len(sys.argv) == 3 else None)
+    Path(sys.argv[1]).write_text(json.dumps(foto, ensure_ascii=False, indent=2), encoding="utf-8")

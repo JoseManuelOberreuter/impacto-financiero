@@ -2,7 +2,8 @@ import os
 
 from fastapi import APIRouter, Query, Response
 
-from app.datos_ejemplo.home import home_de_ejemplo, todos_los_datos
+# Se llama a través del módulo para que una recarga de los datos (app/fotos.py) se vea al tiro.
+from app.datos_ejemplo import home as datos_home
 from app.modelos.home import CambioSemana, Home
 
 router = APIRouter()
@@ -21,11 +22,11 @@ def obtener_home(
     """Todo lo que necesita la pantalla de inicio en una sola llamada."""
     response.headers["Cache-Control"] = f"public, max-age={CACHE_SEGUNDOS}"
     ids = [a.strip() for a in anclados.split(",") if a.strip()] if anclados else None
-    return home_de_ejemplo(ids)
+    return datos_home.home_de_ejemplo(ids)
 
 
 @router.get("/datos", response_model=list[CambioSemana])
 def obtener_datos(response: Response) -> list[CambioSemana]:
     """Todos los datos con su último movimiento, ordenados por presión."""
     response.headers["Cache-Control"] = f"public, max-age={CACHE_SEGUNDOS}"
-    return todos_los_datos()
+    return datos_home.todos_los_datos()

@@ -1,27 +1,28 @@
-"""Genera una foto de las series principales del Banco Central para la API.
+"""Conector del Banco Central: las series principales de su Base de Datos Estadísticos.
 
-Primer borrador del conector del Banco Central: descarga los últimos años de
-cada serie del catálogo de abajo y los guarda en un JSON. La API calcula con
-ellos la presión, la banda normal y los gráficos. Cuando exista la base de
-datos (Supabase), el mismo catálogo y la misma descarga guardarán ahí.
+Descarga los últimos años de cada serie del catálogo de abajo. La API calcula con
+ellas la presión, la banda normal y los gráficos.
 
-Uso:
-    python scripts/snapshot_bcch.py app/datos_ejemplo/bcch_snapshot.json
+Uso suelto (solo escribe el JSON):
+    python -m app.ingesta.bcch app/datos_ejemplo/bcch_snapshot.json
 
 Lee el token desde BCCH_TOKEN (variable de entorno o archivo .env).
 Códigos y criterios: docs/banco-central-series.md.
 """
 
 import json
-import os
 import sys
 import urllib.parse
 import urllib.request
 from datetime import date
 from pathlib import Path
 
+from app.ingesta import Serie, credencial
+
+ID = "bcch"
+FUENTE_ID = "bcch"
+ARCHIVO = "bcch_snapshot.json"
 URL = "https://si3.bcentral.cl/SieteRestWS/SieteRestWS.ashx"
-RAIZ = Path(__file__).resolve().parent.parent
 # 5 años para la banda normal, más 1 de margen para calcular variaciones.
 ANIOS = 6
 
@@ -52,18 +53,6 @@ SERIES = {
 }
 
 
-def token() -> str:
-    if os.getenv("BCCH_TOKEN"):
-        return os.environ["BCCH_TOKEN"]
-    archivo = RAIZ / ".env"
-    if archivo.exists():
-        for linea in archivo.read_text(encoding="utf-8").splitlines():
-            clave, _, valor = linea.partition("=")
-            if clave.strip() == "BCCH_TOKEN" and valor.strip():
-                return valor.strip().strip("\"'")
-    raise SystemExit("Falta BCCH_TOKEN en el entorno o en impacto-api/.env")
-
-
 def leer_json(crudo: bytes) -> dict:
     try:
         return json.loads(crudo.decode("utf-8"))
@@ -74,7 +63,7 @@ def leer_json(crudo: bytes) -> dict:
 def descargar(codigo: str, desde: date) -> list[list]:
     consulta = urllib.parse.urlencode(
         {
-            "token": token(),
+            "token": credencial("BCCH_TOKEN"),
             "function": "GetSeries",
             "timeseries": codigo,
             "firstdate": desde.isoformat(),
@@ -97,10 +86,7 @@ def descargar(codigo: str, desde: date) -> list[list]:
     return observaciones
 
 
-def main() -> None:
-    if len(sys.argv) != 2:
-        raise SystemExit(__doc__)
-    salida = Path(sys.argv[1])
+def generar() -> dict:
     hoy = date.today()
     desde = date(hoy.year - ANIOS, hoy.month, 1)
 
@@ -108,23 +94,32 @@ def main() -> None:
     for id_, (codigo, nombre, unidad) in SERIES.items():
         observaciones = descargar(codigo, desde)
         if not observaciones:
-            raise SystemExit(f"{id_} ({codigo}) no trajo datos")
-        series[id_] = {
-            "codigo": codigo,
-            "nombre": nombre,
-            "unidad": unidad,
-            "observaciones": observaciones,
-        }
-        print(f"{id_:<18} {len(observaciones):>5} obs., último {observaciones[-1]}")
+            raise RuntimeError(f"{id_} ({codigo}) no trajo datos")
+        series[id_] = {"codigo": codigo, "nombre": nombre, "unidad": unidad, "observaciones": observaciones}
+        print(f"  {id_:<18} {len(observaciones):>5} obs., último {observaciones[-1]}")
 
-    foto = {
+    return {
         "fuente": "Banco Central de Chile, Base de Datos Estadísticos",
         "descargado_el": hoy.isoformat(),
         "series": series,
     }
-    salida.write_text(json.dumps(foto, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
-    print(f"Guardado en {salida} ({salida.stat().st_size // 1024} KB)")
+
+
+def series(foto: dict) -> list[Serie]:
+    return [
+        Serie(
+            id=f"bcch.{id_}",
+            nombre=datos["nombre"],
+            unidad=datos["unidad"],
+            frecuencia="diaria" if datos["codigo"].endswith(".D") else "mensual",
+            codigo=datos["codigo"],
+            observaciones=[(f, v) for f, v in datos["observaciones"]],
+        )
+        for id_, datos in foto["series"].items()
+    ]
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) != 2:
+        raise SystemExit(__doc__)
+    Path(sys.argv[1]).write_text(json.dumps(generar(), ensure_ascii=False, separators=(",", ":")), encoding="utf-8")

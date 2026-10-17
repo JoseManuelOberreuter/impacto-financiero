@@ -1,14 +1,13 @@
 """Herramientas de ejemplo.
 
 Mi AFP usa la foto real de la Superintendencia de Pensiones (afp_snapshot.json,
-generada con scripts/snapshot_afp.py). Las fechas del calendario marcadas como
+generada con app/ingesta/afp.py). Las fechas del calendario marcadas como
 estimadas siguen el patrón habitual de publicación y deben confirmarse.
 """
 
-import json
 from datetime import date
-from pathlib import Path
 
+from app import fotos
 from app.modelos.herramientas import (
     Calculadora,
     EventoCalendario,
@@ -17,7 +16,7 @@ from app.modelos.herramientas import (
     SeccionMetodologia,
 )
 
-_AFP = json.loads((Path(__file__).parent / "afp_snapshot.json").read_text(encoding="utf-8"))
+_AFP = fotos.leer("afp")
 
 CALCULADORAS = [
     Calculadora(
