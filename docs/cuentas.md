@@ -22,7 +22,7 @@ Todas viven en `/cuenta/...`, fuera de las 5 pestañas: se abren encima del men�
 | Pantalla | Ruta | Qué hace |
 |---|---|---|
 | Mi cuenta | `/cuenta` | Siempre: Apariencia (automático, claro u oscuro, guardada en el dispositivo). Sin sesión: qué se gana con una cuenta, "Crear cuenta" e "Iniciar sesión". Con sesión: nombre, correo, plan, cambiar contraseña, cerrar sesión (aquí o en todos los dispositivos) y, abajo y en gris, un enlace discreto a "Borrar cuenta" |
-| Crear cuenta | `/cuenta/crear` | Nombre (opcional), correo, contraseña con medidor en vivo, repetir contraseña y aceptar los términos y la política de privacidad |
+| Crear cuenta | `/cuenta/crear` | Nombre (opcional), correo, contraseña con medidor en vivo, repetir contraseña y aceptar los términos (con el aviso legal) y la política de privacidad, con enlaces a cada uno. Guarda la versión aceptada y la fecha ([legal.md](legal.md)) |
 | Verifica tu correo | `/cuenta/verificar` | "Te enviamos un enlace". Botón para reenviar, con espera de 60 segundos entre envíos |
 | Iniciar sesión | `/cuenta/ingresar` | Correo y contraseña, "Mostrar contraseña" y "¿Olvidaste tu contraseña?". El error no dice si el correo existe |
 | Recuperar contraseña | `/cuenta/recuperar` | Pide el correo y siempre responde "Si existe una cuenta con ese correo, te enviamos un enlace" |

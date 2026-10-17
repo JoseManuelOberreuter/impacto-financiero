@@ -102,6 +102,7 @@ Cada directorio tiene su README con las instrucciones para correrlo en local.
 | [docs/banco-central-series.md](docs/banco-central-series.md) | Códigos de las series del Banco Central por termómetro, cómo usar su API y datos propios que salen de cruzarlas |
 | [docs/planes.md](docs/planes.md) | Planes Gratis, Pro y Empresas, capacidades por plan, modos de activación y tablas de la base |
 | [docs/ingesta.md](docs/ingesta.md) | Ingesta diaria: conectores de cada fuente, tablas de Supabase (`fotos`, `series`, `observaciones`), cómo la API se recarga sola y el cron |
+| [docs/legal.md](docs/legal.md) | Aviso legal y fuentes, términos de uso y política de privacidad: dónde aparecen y cómo se guarda el consentimiento |
 | [docs/cuentas.md](docs/cuentas.md) | Cuentas opcionales con Supabase Auth: registro, verificación, recuperación, reglas de contraseña y configuración del panel |
 | [docs/plan-pro.md](docs/plan-pro.md) | Qué vende el plan Pro (Mi impacto, lo que viene, cruces y alertas), qué queda gratis y cómo validarlo |
 | [docs/riesgos.md](docs/riesgos.md) | Bloqueantes y riesgos legales, técnicos y de negocio, y cuándo atenderlos |
