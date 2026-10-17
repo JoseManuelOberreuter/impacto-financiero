@@ -72,6 +72,7 @@ Termómetros
 ```
 
 - **Lo que más le gustó al usuario:** el titular grande, que haya gráficos y las flechas de "lo que cambió".
+- **Impacto Financiero** (desde el 16-oct-2026): reemplaza a la tarjeta de la canasta como protagonista del Inicio. En el Inicio va solo la cifra (cuánto más le cuesta la vida a un hogar típico de Santiago que hace un año); el detalle por rubro y "Calcular el mío" están en su termómetro (`/termometros/impacto`). Metodología: [impacto-financiero.md](impacto-financiero.md).
 - **"Lo que cambió esta semana"** (`cambios` en `GET /v1/home`), desde el 16-oct-2026: **todos los datos compiten** y se muestran los que más presionan. Código: `_candidatos` y `_cambios` en `impacto-api/app/datos_ejemplo/home.py`.
   - **Candidatos (15):** bencina 95, gas licuado 15 kg, el alimento que más se movió en la semana, dólar, cobre, petróleo WTI, UF, tasa máxima de los créditos, TPM, tasa hipotecaria, IPC, desempleo, IMACEC, percepción de las personas (IPEC) y confianza de las empresas (IMCE).
   - **Orden:** presión alta primero, después media y baja. En cada nivel, los que se movieron van antes que los estables.

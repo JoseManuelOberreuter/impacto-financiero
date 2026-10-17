@@ -90,6 +90,8 @@ Cada directorio tiene su README con las instrucciones para correrlo en local.
 
 | Documento | Contenido |
 |---|---|
+| [docs/catalogo-de-datos.md](docs/catalogo-de-datos.md) | **De dónde sale cada dato** que muestra la app: fuente, serie o archivo, script y fecha de la última descarga |
+| [docs/impacto-financiero.md](docs/impacto-financiero.md) | Metodología del Impacto Financiero: la inflación en pesos para un hogar típico, con la Encuesta de Presupuestos Familiares del INE |
 | [docs/fuentes-de-datos.md](docs/fuentes-de-datos.md) | Cómo se accede a cada fuente, qué hacer con las que no tienen API, y frecuencia y desfase de cada dato |
 | [docs/termometros.md](docs/termometros.md) | Termómetros, onboarding, estado de presión y estructura del home |
 | [docs/indice-canasta.md](docs/indice-canasta.md) | Metodología del Índice Impacto de la Canasta |
