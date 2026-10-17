@@ -13,6 +13,7 @@ import statistics
 from datetime import date, timedelta
 from pathlib import Path
 
+from app.calculos import estado
 from app.calculos.presion import evaluar, la_mas_alta
 from app.datos_ejemplo import banco_central as bc
 from app.datos_ejemplo import cmf, cne
@@ -344,8 +345,8 @@ _PRESION_BOLSILLO = la_mas_alta(_PRESION_IPC, _PRESION_BENCINA)
 _PRESION_ACTIVIDAD = la_mas_alta(_PRESION_DESEMPLEO, _PRESION_IMACEC)
 
 
-def _etiqueta(presion: Presion) -> str:
-    return f"Presión {presion.value}"
+def _etiqueta(id_: str, presion: Presion) -> str:
+    return estado.del_termometro(id_, presion)
 
 TERMOMETROS = [
     Termometro(
@@ -353,7 +354,7 @@ TERMOMETROS = [
         nombre="Impacto Financiero",
         pregunta="¿Cuánto más me cuesta vivir?",
         presion=_PRESION_IMPACTO,
-        etiqueta_presion=_etiqueta(_PRESION_IMPACTO),
+        etiqueta_presion=_etiqueta("impacto", _PRESION_IMPACTO),
         tendencia=bc.tendencia(_IMPACTO.diferencia_mensual, 0),
         dato_clave=f"{_signo_pesos(_IMPACTO.diferencia_anual)} al mes que hace un año",
         frase=_texto_impacto(),
@@ -366,7 +367,7 @@ TERMOMETROS = [
         nombre="Bolsillo",
         pregunta="¿Está más cara la vida?",
         presion=_PRESION_BOLSILLO,
-        etiqueta_presion=_etiqueta(_PRESION_BOLSILLO),
+        etiqueta_presion=_etiqueta("bolsillo", _PRESION_BOLSILLO),
         tendencia=bc.tendencia(CANASTA.variacion_semanal, 0.5),
         dato_clave=f"Canasta semanal: {_pesos(CANASTA.total)} ({_pct(CANASTA.variacion_semanal)})",
         frase=_texto_alimentos(),
@@ -379,7 +380,7 @@ TERMOMETROS = [
         nombre="Deudas",
         pregunta="¿Está más caro endeudarse?",
         presion=_PRESION_DEUDAS,
-        etiqueta_presion=_etiqueta(_PRESION_DEUDAS),
+        etiqueta_presion=_etiqueta("deudas", _PRESION_DEUDAS),
         tendencia=bc.tendencia(_TPM_CAMBIO, 0.01),
         dato_clave=f"Tasa del Banco Central: {bc.tasa(_TPM.ultimo.valor)}",
         frase=_texto_tpm(),
@@ -392,7 +393,7 @@ TERMOMETROS = [
         nombre="Ahorro y pensiones",
         pregunta="¿Cómo le va a mi plata?",
         presion=Presion.media,
-        etiqueta_presion="Presión media",
+        etiqueta_presion=_etiqueta("ahorro", Presion.media),
         tendencia=Tendencia.estable,
         dato_clave=f"Fondo C: {_pct(_mediana_fondo('C', 'mes'))} en el mes",
         frase=_texto_fondos(),
@@ -405,7 +406,7 @@ TERMOMETROS = [
         nombre="Actividad y empleo",
         pregunta="¿Cómo va la economía en general?",
         presion=_PRESION_ACTIVIDAD,
-        etiqueta_presion=_etiqueta(_PRESION_ACTIVIDAD),
+        etiqueta_presion=_etiqueta("actividad", _PRESION_ACTIVIDAD),
         tendencia=bc.tendencia(_DESEMPLEO_12M, 0.1),
         dato_clave=f"Desempleo: {bc.pct(_DESEMPLEO.ultimo.valor)}",
         frase=_texto_actividad(),
@@ -418,7 +419,7 @@ TERMOMETROS = [
         nombre="Dólar y mercados",
         pregunta="¿Qué pasa afuera?",
         presion=_PRESION_DOLAR,
-        etiqueta_presion=_etiqueta(_PRESION_DOLAR),
+        etiqueta_presion=_etiqueta("dolar", _PRESION_DOLAR),
         tendencia=bc.tendencia(_DOLAR_SEMANA, 0.3),
         dato_clave=f"Dólar observado: {bc.pesos(_DOLAR.ultimo.valor)}",
         frase=_texto_dolar(),
@@ -431,7 +432,7 @@ TERMOMETROS = [
         nombre="Ánimo",
         pregunta="¿Cómo se siente la gente?",
         presion=_PRESION_ANIMO,
-        etiqueta_presion=_etiqueta(_PRESION_ANIMO),
+        etiqueta_presion=_etiqueta("animo", _PRESION_ANIMO),
         tendencia=bc.tendencia(_cambio_mensual(_IPEC_SERIE), 1),
         dato_clave=f"Percepción de las personas: {bc.numero(_IPEC.valor)} puntos",
         frase=_texto_animo(),
@@ -590,4 +591,9 @@ def termometros_de_ejemplo() -> list[Termometro]:
 def termometro_de_ejemplo(id_: str) -> TermometroDetalle | None:
     if id_ not in _POR_ID:
         return None
-    return TermometroDetalle(**_POR_ID[id_].model_dump(), **_DETALLES[id_], metodologia=_METODOLOGIA)
+    detalle = dict(_DETALLES[id_])
+    # Cada indicador con su frase en palabras simples ("Más cara que lo normal").
+    detalle["indicadores"] = [
+        i.model_copy(update={"estado": estado.del_dato(i.id, i.presion)}) for i in detalle["indicadores"]
+    ]
+    return TermometroDetalle(**_POR_ID[id_].model_dump(), **detalle, metodologia=_METODOLOGIA)
