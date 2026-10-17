@@ -5,11 +5,10 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import type { Termometro } from '@/api/tipos';
 import { Encabezado } from '@/components/encabezado';
 import { IconoTermometro } from '@/components/icono-termometro';
-import { NivelPresion } from '@/components/nivel-presion';
 import { ContenidoApi, Pagina } from '@/components/pagina';
 import { ThemedText } from '@/components/themed-text';
 import { Vidrio } from '@/components/vidrio';
-import { PRESION } from '@/constants/presion';
+import { COLOR_DIRECCION, TENDENCIA } from '@/constants/presion';
 import { Spacing } from '@/constants/theme';
 import { useApi } from '@/hooks/use-api';
 import { useTheme } from '@/hooks/use-theme';
@@ -54,7 +53,7 @@ function EnlaceTodosLosDatos() {
               Todos los datos
             </ThemedText>
             <ThemedText type="small" themeColor="textSecondary">
-              Filtra por presión y ancla los que quieres ver primero.
+              Mira lo que más se movió y ancla los que quieres ver primero.
             </ThemedText>
           </View>
           <ChevronRight size={18} color={theme.textSecondary} />
@@ -66,15 +65,15 @@ function EnlaceTodosLosDatos() {
 
 function TarjetaTermometro({ termometro }: { termometro: Termometro }) {
   const theme = useTheme();
-  const presion = PRESION[termometro.presion];
+  const Flecha = TENDENCIA[termometro.tendencia].icono;
 
   return (
     <Link href={`/termometros/${termometro.id}`} asChild>
       <Pressable>
         <Vidrio style={styles.tarjeta}>
           <View style={styles.encabezado}>
-            <View style={[styles.icono, { backgroundColor: theme[presion.fondo] }]}>
-              <IconoTermometro id={termometro.id} size={20} color={theme[presion.color]} />
+            <View style={[styles.icono, { backgroundColor: theme.backgroundSelected }]}>
+              <IconoTermometro id={termometro.id} size={20} color={theme.accent} />
             </View>
             <View style={styles.titulos}>
               <ThemedText type="smallBold" style={styles.nombre}>
@@ -86,12 +85,10 @@ function TarjetaTermometro({ termometro }: { termometro: Termometro }) {
             </View>
             <ChevronRight size={18} color={theme.textSecondary} />
           </View>
-          <NivelPresion
-            presion={termometro.presion}
-            tendencia={termometro.tendencia}
-            etiqueta={termometro.etiqueta_presion}
-          />
-          <ThemedText style={styles.dato}>{termometro.dato_clave}</ThemedText>
+          <View style={styles.filaDato}>
+            <Flecha size={18} color={theme[COLOR_DIRECCION[termometro.tendencia]]} strokeWidth={2.5} />
+            <ThemedText style={styles.dato}>{termometro.dato_clave}</ThemedText>
+          </View>
           <ThemedText type="small">{termometro.frase}</ThemedText>
           <ThemedText type="small" themeColor="textSecondary" style={styles.pie}>
             Dato al {fechaCorta(termometro.dato_al)} · {termometro.fuentes.join(', ')}
@@ -134,6 +131,11 @@ const styles = StyleSheet.create({
   },
   nombre: {
     fontSize: 17,
+  },
+  filaDato: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
   },
   dato: {
     fontSize: 20,

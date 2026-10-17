@@ -25,7 +25,7 @@ type Props = {
   onLimite?: () => void;
 };
 
-/** Lista de datos: flecha, nombre, detalle, mini gráfico y si está sobre o bajo lo normal. */
+/** Lista de datos: flecha, nombre, detalle y mini gráfico (verde si subió, rojo si bajó). */
 export function ListaCambios({ cambios, anclable, onLimite }: Props) {
   const theme = useTheme();
 
@@ -94,10 +94,6 @@ function FilaCambio({
               <View style={styles.grafico}>
                 <MiniGrafico valores={cambio.serie} color={theme[color]} alto={26} />
               </View>
-              {/* Comparado con los últimos 5 años, en palabras ("Más cara que lo normal"). */}
-              <ThemedText type="small" themeColor="textSecondary" style={styles.presion} numberOfLines={2}>
-                {cambio.estado}
-              </ThemedText>
             </View>
           </View>
         </Pressable>
@@ -167,17 +163,12 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   derecha: {
-    width: 96,
+    width: 76,
     alignItems: 'flex-end',
     gap: Spacing.half,
   },
   grafico: {
     alignSelf: 'stretch',
-  },
-  presion: {
-    fontSize: 11,
-    lineHeight: 14,
-    textAlign: 'right',
   },
   pin: {
     padding: Spacing.one,

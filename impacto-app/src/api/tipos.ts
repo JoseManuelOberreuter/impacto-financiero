@@ -32,8 +32,6 @@ export type Indicador = {
   banda_normal: { min: number; max: number } | null;
   fuente: string;
   dato_al: string;
-  /** Dónde está comparado con lo normal, en palabras: "Más cara que lo normal". */
-  estado?: string | null;
 };
 
 export type Publicacion = { fecha: string; nombre: string; fuente: string };
@@ -150,10 +148,6 @@ export type CambioSemana = {
   tono: 'favorable' | 'desfavorable' | 'neutral';
   /** Qué tan inusual fue el último cambio: veces lo que el dato suele moverse. */
   movimiento: number;
-  /** Dónde está comparado con lo normal, en palabras: "Más cara que lo normal". */
-  estado: string;
-  /** sobre, normal o bajo lo normal de los últimos 5 años. */
-  nivel: 'sobre' | 'normal' | 'bajo';
 };
 
 export type Home = {

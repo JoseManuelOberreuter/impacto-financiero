@@ -5,14 +5,13 @@ import type { Termometro } from '@/api/tipos';
 import { IconoTermometro } from '@/components/icono-termometro';
 import { ThemedText } from '@/components/themed-text';
 import { Vidrio } from '@/components/vidrio';
-import { COLOR_DIRECCION, PRESION, TENDENCIA } from '@/constants/presion';
+import { COLOR_DIRECCION, TENDENCIA } from '@/constants/presion';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
-/** Versión compacta del termómetro para el home: ícono, nombre y nivel de presión. */
+/** Versión compacta del termómetro para el home: ícono, nombre, flecha y dato clave. */
 export function TermometroTile({ termometro }: { termometro: Termometro }) {
   const theme = useTheme();
-  const presion = PRESION[termometro.presion];
   const tendencia = TENDENCIA[termometro.tendencia];
   const IconoTendencia = tendencia.icono;
 
@@ -20,13 +19,13 @@ export function TermometroTile({ termometro }: { termometro: Termometro }) {
     <Link href={`/termometros/${termometro.id}`} asChild>
       <Pressable
         style={styles.enlace}
-        accessibilityLabel={`${termometro.nombre}: ${termometro.etiqueta_presion}, tendencia ${tendencia.texto}`}>
+        accessibilityLabel={`${termometro.nombre}: ${termometro.dato_clave}, ${tendencia.texto}`}>
         <Vidrio style={styles.tile}>
-          <View style={[styles.icono, { backgroundColor: theme[presion.fondo] }]}>
+          <View style={[styles.icono, { backgroundColor: theme.backgroundSelected }]}>
             <IconoTermometro
               id={termometro.id}
               size={18}
-              color={theme[presion.color]}
+              color={theme.accent}
               strokeWidth={2}
             />
           </View>
@@ -35,8 +34,8 @@ export function TermometroTile({ termometro }: { termometro: Termometro }) {
           </ThemedText>
           <View style={styles.nivel}>
             <IconoTendencia size={14} color={theme[COLOR_DIRECCION[termometro.tendencia]]} strokeWidth={2.5} />
-            <ThemedText type="smallBold" themeColor={presion.color} numberOfLines={2} style={styles.estado}>
-              {termometro.etiqueta_presion}
+            <ThemedText type="small" themeColor="textSecondary" numberOfLines={2} style={styles.estado}>
+              {termometro.dato_clave}
             </ThemedText>
           </View>
         </Vidrio>

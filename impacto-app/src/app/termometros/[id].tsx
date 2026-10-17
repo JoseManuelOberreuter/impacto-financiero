@@ -6,12 +6,11 @@ import { Encabezado } from '@/components/encabezado';
 import { Fila } from '@/components/fila';
 import { DetalleImpacto } from '@/components/impacto-financiero';
 import { MiniGrafico } from '@/components/mini-grafico';
-import { NivelPresion } from '@/components/nivel-presion';
 import { ContenidoApi, Pagina } from '@/components/pagina';
 import { Seccion } from '@/components/seccion';
 import { ThemedText } from '@/components/themed-text';
 import { Vidrio } from '@/components/vidrio';
-import { PRESION } from '@/constants/presion';
+import { COLOR_DIRECCION } from '@/constants/presion';
 import { Spacing } from '@/constants/theme';
 import { useApi } from '@/hooks/use-api';
 import { useTheme } from '@/hooks/use-theme';
@@ -37,7 +36,6 @@ function Detalle({ termometro: t }: { termometro: TermometroDetalle }) {
         titulo={t.nombre}
         bajada={t.pregunta}
         volverA="/termometros"
-        extra={<NivelPresion presion={t.presion} tendencia={t.tendencia} etiqueta={t.etiqueta_presion} />}
       />
 
       <View style={styles.bloque}>
@@ -107,7 +105,10 @@ function Detalle({ termometro: t }: { termometro: TermometroDetalle }) {
 
 function TarjetaIndicador({ indicador }: { indicador: Indicador }) {
   const theme = useTheme();
-  const color = theme[PRESION[indicador.presion].color];
+  // Verde si el último dato subió, rojo si bajó, gris si no cambió (como en el resto de la app).
+  const [anterior, ultimo] = indicador.serie.slice(-2).map((p) => p.valor);
+  const direccion = ultimo > anterior ? 'sube' : ultimo < anterior ? 'baja' : 'estable';
+  const color = theme[COLOR_DIRECCION[direccion]];
 
   return (
     <Vidrio style={styles.tarjeta}>
@@ -115,7 +116,6 @@ function TarjetaIndicador({ indicador }: { indicador: Indicador }) {
         <ThemedText type="smallBold" style={styles.nombreIndicador}>
           {indicador.nombre}
         </ThemedText>
-        <NivelPresion presion={indicador.presion} etiqueta={indicador.estado ?? undefined} />
       </View>
       <View style={styles.filaValor}>
         <ThemedText style={styles.valorIndicador}>{indicador.valor}</ThemedText>

@@ -11,18 +11,18 @@ import { useAnclados } from '@/hooks/use-anclados';
 import { useApi } from '@/hooks/use-api';
 import { useTheme } from '@/hooks/use-theme';
 
-type Orden = 'movimiento' | 'sobre' | 'bajo';
+type Orden = 'movimiento' | 'subio' | 'bajo';
 
 // Siempre se ven todos los datos: cada opción solo cambia el orden.
 const ORDENES: { id: Orden; etiqueta: string }[] = [
   { id: 'movimiento', etiqueta: 'Lo que más se movió' },
-  { id: 'sobre', etiqueta: 'Sobre lo normal' },
-  { id: 'bajo', etiqueta: 'Bajo lo normal' },
+  { id: 'subio', etiqueta: 'Lo que más subió' },
+  { id: 'bajo', etiqueta: 'Lo que más bajó' },
 ];
 
-const PRIMERO: Record<'sobre' | 'bajo', CambioSemana['nivel'][]> = {
-  sobre: ['sobre', 'normal', 'bajo'],
-  bajo: ['bajo', 'normal', 'sobre'],
+const PRIMERO: Record<'subio' | 'bajo', CambioSemana['direccion'][]> = {
+  subio: ['sube', 'estable', 'baja'],
+  bajo: ['baja', 'estable', 'sube'],
 };
 
 /** Dentro de cada grupo, lo que más se movió va primero. */
@@ -30,7 +30,7 @@ function ordenar(datos: CambioSemana[], orden: Orden): CambioSemana[] {
   const porMovimiento = [...datos].sort((a, b) => b.movimiento - a.movimiento);
   if (orden === 'movimiento') return porMovimiento;
   const prioridad = PRIMERO[orden];
-  return porMovimiento.sort((a, b) => prioridad.indexOf(a.nivel) - prioridad.indexOf(b.nivel));
+  return porMovimiento.sort((a, b) => prioridad.indexOf(a.direccion) - prioridad.indexOf(b.direccion));
 }
 
 export default function DatosScreen() {
