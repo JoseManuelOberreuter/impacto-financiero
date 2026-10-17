@@ -41,7 +41,7 @@ function Contenido({ home }: { home: Home }) {
             Hoy en Chile
           </ThemedText>
         ) : (
-          <ThemedText type="smallBold">Impacto</ThemedText>
+          <ThemedText type="smallBold">Impacto Financiero</ThemedText>
         )}
         {/* Fuera del escritorio, deja espacio al selector de país fijo en la esquina. */}
         <ThemedText

@@ -15,6 +15,7 @@ import {
   Wrench,
   type LucideIcon,
 } from 'lucide-react-native';
+import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
@@ -36,14 +37,22 @@ const SECCIONES: { name: string; href: Href; titulo: string; icono: LucideIcon }
  * para que se sienta como la app en el celular.
  */
 export default function AppTabs() {
-  const { esEscritorio } = useDiseno();
+  const { esEscritorio, marcaFuera } = useDiseno();
 
   // Los TabTrigger deben ser hijos directos de TabList: así define las rutas del menú.
   return (
     <Tabs>
       <TabSlot style={styles.slot} />
+      {/* En pantallas anchas la marca va fija arriba a la izquierda, fuera del menú (como la bandera a la derecha). */}
+      {marcaFuera && (
+        <View pointerEvents="none" style={styles.marca}>
+          <ThemedText type="smallBold" style={styles.textoMarca}>
+            Impacto Financiero
+          </ThemedText>
+        </View>
+      )}
       <TabList asChild>
-        <BarraNavegacion esEscritorio={esEscritorio}>
+        <BarraNavegacion esEscritorio={esEscritorio} marcaDentro={esEscritorio && !marcaFuera}>
           {SECCIONES.map((seccion) => (
             <TabTrigger key={seccion.name} name={seccion.name} href={seccion.href} asChild>
               <BotonSeccion titulo={seccion.titulo} icono={seccion.icono} compacto={!esEscritorio} />
@@ -55,20 +64,43 @@ export default function AppTabs() {
   );
 }
 
+/**
+ * Ancho de la barra de desplazamiento del navegador (15 px en Windows, 0 en Mac).
+ * El contenido se centra en el espacio que deja la barra; el menú debe hacer lo mismo.
+ */
+function anchoScrollbar(): number {
+  if (typeof document === 'undefined') return 0;
+  const prueba = document.createElement('div');
+  prueba.style.cssText = 'position:absolute;top:-9999px;width:100px;height:100px;overflow:scroll';
+  document.body.appendChild(prueba);
+  const ancho = prueba.offsetWidth - prueba.clientWidth;
+  prueba.remove();
+  return ancho;
+}
+
 function BarraNavegacion({
   esEscritorio,
+  marcaDentro,
   children,
   style,
   ...props
-}: TabListProps & { esEscritorio: boolean }) {
+}: TabListProps & { esEscritorio: boolean; marcaDentro: boolean }) {
+  const [scrollbar] = useState(anchoScrollbar);
+
   return (
     <View
       {...props}
-      style={[style, styles.contenedorBarra, esEscritorio ? styles.arriba : styles.abajo]}>
-      <Vidrio style={[styles.barra, !esEscritorio && styles.barraCompacta]}>
-        {esEscritorio && (
-          <ThemedText type="smallBold" style={styles.marca}>
-            Impacto
+      style={[
+        style,
+        styles.contenedorBarra,
+        esEscritorio ? styles.arriba : styles.abajo,
+        { right: scrollbar },
+      ]}>
+      {/* Mismo ancho que el contenido: los bordes calzan con las tarjetas y las secciones quedan al centro. */}
+      <Vidrio style={[styles.barra, esEscritorio ? styles.barraAncha : styles.barraCompacta]}>
+        {marcaDentro && (
+          <ThemedText type="smallBold" style={styles.marcaDentro}>
+            Impacto Financiero
           </ThemedText>
         )}
         {children}
@@ -127,11 +159,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     width: '100%',
-    maxWidth: MaxContentWidth + Spacing.six,
+    // Mismo ancho que la columna de contenido, para que los bordes calcen con las tarjetas.
+    maxWidth: MaxContentWidth,
     borderRadius: Spacing.five,
     paddingHorizontal: Spacing.two,
     paddingVertical: Spacing.two,
     gap: Spacing.one,
+  },
+  barraAncha: {
+    justifyContent: 'center',
+  },
+  marcaDentro: {
+    marginLeft: Spacing.three,
+    marginRight: 'auto',
+    fontSize: 15,
   },
   barraCompacta: {
     justifyContent: 'space-around',
@@ -139,8 +180,12 @@ const styles = StyleSheet.create({
     gap: 0,
   },
   marca: {
-    marginLeft: Spacing.three,
-    marginRight: 'auto',
+    position: 'absolute',
+    top: Spacing.three,
+    left: Spacing.three,
+    paddingVertical: Spacing.one,
+  },
+  textoMarca: {
     fontSize: 15,
   },
   boton: {
