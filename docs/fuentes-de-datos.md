@@ -199,7 +199,7 @@ Los rangos de referencia que teníamos calzan bien con los datos reales. Convien
   - **Precios viejos:** en la Región Metropolitana solo ~40 de 436 estaciones actualizaron la bencina 93 en la última semana. Se usa la mediana de las estaciones con precio de los últimos 7 días (30 si son menos de 10).
   - **Historia con meses corruptos:** algunos meses de 2025 y 2026 traen el nombre del combustible en vez del precio (por ejemplo, `"gasolina_95_sp"`). Esos meses se descartan.
 - **Uso:** precio de hoy de la bencina y precio del gas para la canasta, y gráfico y presión de la bencina en el termómetro Bolsillo. La CNE declara públicos los precios de las estaciones (Rex CNE 492/2023).
-- **Script:** [`impacto-api/scripts/snapshot_cne.py`](../impacto-api/scripts/snapshot_cne.py).
+- **Script:** [`impacto-api/app/ingesta/cne.py`](../impacto-api/app/ingesta/cne.py).
 
 ### Transporte público (RM)
 

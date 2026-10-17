@@ -104,9 +104,9 @@ Esto es lo que más diferencia a la app: nadie lo muestra junto y explicado.
 | Banco Central: ICVR | Compraventas por facturación electrónica | Comercio / actividad regional | Por confirmar (experimental) | Web | Nueva |
 | CMF: indicadores | UF, dólar, UTM, IPC, TMC, TIP, TAB | Crédito / banca | Diaria y mensual | API con apikey | Prevista (falta la clave) |
 | CMF: hechos esenciales | Hechos relevantes de empresas | Mercado de capitales | Continua | Web + alertas por correo | Prevista |
-| Superintendencia de Pensiones: valor cuota | Rentabilidad de las AFP por fondo | Pensiones / ahorro | Diaria (provisional; se confirma después) | CSV | **Foto real** (`snapshot_afp.py`) |
+| Superintendencia de Pensiones: valor cuota | Rentabilidad de las AFP por fondo | Pensiones / ahorro | Diaria (provisional; se confirma después) | CSV | **Foto real** (`app/ingesta/afp.py`) |
 | Superintendencia de Pensiones: seguro de cesantía | Solicitudes y beneficiarios | Empleo (adelantado) | Mensual | Series web | Nueva |
-| ODEPA | Precios de alimentos al consumidor | Hogares / agro | Semanal (viernes) | CSV en datos abiertos (CKAN) | **Foto real** (`snapshot_odepa.py`) |
+| ODEPA | Precios de alimentos al consumidor | Hogares / agro | Semanal (viernes) | CSV en datos abiertos (CKAN) | **Foto real** (`app/ingesta/odepa.py`) |
 | CNE: combustibles | Bencina, diésel y gas por estación | Energía / transporte / hogares | Continua (según informe cada estación) | API con token Bearer | Ejemplo (falta el token) |
 | ENAP / CNE: paridad MEPCO | Precio de paridad de los combustibles | Energía / hogares (anticipa precios) | Semanal | PDF / web | Nueva |
 | Coordinador Eléctrico Nacional | Costo marginal de la electricidad | Energía / industria / tarifas | Horaria / diaria | API con credenciales | Nueva |

@@ -1,39 +1,27 @@
 # Catálogo de datos: de dónde sale cada dato
 
-> Estado al 16-oct-2026. Todavía no hay base de datos: cada fuente se descarga con un script a una "foto" JSON dentro del repo (`impacto-api/app/datos_ejemplo/`), y la API calcula todo a partir de esas fotos. Este documento dice, para cada dato que muestra la app, de qué fuente viene, con qué código o archivo y cómo se actualiza.
+> Estado al 17-oct-2026. Cada fuente se descarga con su conector (`impacto-api/app/ingesta/`) a una "foto" que se guarda en Supabase, junto con la historia de cada serie ([ingesta.md](ingesta.md)). La API calcula todo a partir de esas fotos; si Supabase no responde, usa los JSON de respaldo de `impacto-api/app/datos_ejemplo/`. Este documento dice, para cada dato que muestra la app, de qué fuente viene, con qué código o archivo y cómo se actualiza.
 > Detalle de cada API: [fuentes-de-datos.md](fuentes-de-datos.md). Códigos del Banco Central: [banco-central-series.md](banco-central-series.md). Metodologías propias: [impacto-financiero.md](impacto-financiero.md), [indice-canasta.md](indice-canasta.md) y [termometros.md](termometros.md).
 
 ## 1. Fuentes y cómo se actualizan
 
-| Fuente | Qué entrega | Acceso | Credencial (`impacto-api/.env`) | Script | Foto en el repo | Última descarga |
+| Fuente | Qué entrega | Acceso | Credencial (`impacto-api/.env`) | Conector | Foto de respaldo en el repo | Última descarga |
 |---|---|---|---|---|---|---|
-| **Banco Central (BDE)** | 20 series: dólar, euro, UF, UTM, TPM, tasas, IPC (general y por división), IMACEC, desempleo, cobre, petróleo, IPEC, IMCE y expectativas | API REST | `BCCH_TOKEN` (vence al año) | `scripts/snapshot_bcch.py` | `bcch_snapshot.json` | 16-oct-2026 |
-| **CNE** | Bencina y diésel por estación (hoy), historia mensual de combustibles y gas licuado por región | API REST (login con correo y clave) | `CNE_EMAIL`, `CNE_PASSWORD` | `scripts/snapshot_cne.py` | `cne_snapshot.json` | 15-oct-2026 |
-| **CMF** | Tasa máxima convencional (TMC) por tramo, 6 años | API REST | `CMF_API_KEY` | `scripts/snapshot_cmf.py` | `cmf_snapshot.json` | 15-oct-2026 |
-| **ODEPA** | Precios al consumidor de 10 alimentos, por semana, región y tipo de local | CSV de datos abiertos (se descarga a mano) | No | `scripts/snapshot_odepa.py` | `odepa_snapshot.json` | Semana del 9-oct-2026 |
-| **Superintendencia de Pensiones** | Valor cuota de las 7 AFP en los fondos A a E | Descarga pública | No | `scripts/snapshot_afp.py` | `afp_snapshot.json` | Dato al 14-oct-2026 |
+| **Banco Central (BDE)** | 20 series: dólar, euro, UF, UTM, TPM, tasas, IPC (general y por división), IMACEC, desempleo, cobre, petróleo, IPEC, IMCE y expectativas | API REST | `BCCH_TOKEN` (vence al año) | `app/ingesta/bcch.py` | `bcch_snapshot.json` | 17-oct-2026 |
+| **CNE** | Bencina y diésel por estación (hoy), historia mensual de combustibles y gas licuado por región | API REST (login con correo y clave) | `CNE_EMAIL`, `CNE_PASSWORD` | `app/ingesta/cne.py` | `cne_snapshot.json` | 17-oct-2026 |
+| **CMF** | Tasa máxima convencional (TMC) por tramo, 6 años | API REST | `CMF_API_KEY` | `app/ingesta/cmf.py` | `cmf_snapshot.json` | 17-oct-2026 |
+| **ODEPA** | Precios al consumidor de 10 alimentos, por semana, región y tipo de local | CSV de datos abiertos (se descarga solo) | No | `app/ingesta/odepa.py` | `odepa_snapshot.json` | Semana al 16-oct-2026 (descargada el 17-oct-2026) |
+| **Superintendencia de Pensiones** | Valor cuota de las 7 AFP en los fondos A a E | Descarga pública | No | `app/ingesta/afp.py` | `afp_snapshot.json` | Dato al 14-oct-2026 |
 | **INE: IX Encuesta de Presupuestos Familiares** | Gasto promedio de los hogares y su reparto por rubro y producto (oct-2021 a sep-2022) | Publicaciones y bases de datos (CSV) del INE | No | `scripts/resumen_epf.py` (ver sección 4) | `epf_ix.json` | Publicada el 26-oct-2023; microdatos procesados el 16-oct-2026 |
 | **Panel de Expertos del Transporte Público** | Tarifa del Metro | Resolución publicada | No | (a mano) | En el código (`precios.py`) | Tarifa vigente desde el 22-feb-2026 |
 
-**Cómo actualizar todo** (desde `impacto-api/`):
+**Cómo actualizar todo** (desde `impacto-api/`): guarda en Supabase y, con `--json`, también los respaldos del repo.
 
 ```bash
-.venv/Scripts/python scripts/snapshot_bcch.py app/datos_ejemplo/bcch_snapshot.json
+.venv/Scripts/python -m app.ingesta --json
 ```
 
-```bash
-.venv/Scripts/python scripts/snapshot_cne.py app/datos_ejemplo/cne_snapshot.json
-```
-
-```bash
-.venv/Scripts/python scripts/snapshot_cmf.py app/datos_ejemplo/cmf_snapshot.json
-```
-
-```bash
-.venv/Scripts/python scripts/snapshot_afp.py 2026 app/datos_ejemplo/afp_snapshot.json
-```
-
-ODEPA necesita primero descargar el CSV del año desde datos.odepa.gob.cl (ver el README del backend). Cuando exista el worker, estas descargas serán diarias y automáticas ([pendientes-backend.md](pendientes-backend.md)).
+Detalle, opciones y el cron diario: [ingesta.md](ingesta.md).
 
 ## 2. Dato por dato
 

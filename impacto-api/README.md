@@ -2,7 +2,7 @@
 
 Backend de Impacto Financiero: API (FastAPI) y, más adelante, el worker de ingesta y cálculos. Ver [../docs/arquitectura.md](../docs/arquitectura.md).
 
-> Estado: endpoints de todas las secciones con **datos de ejemplo** (`app/datos_ejemplo/`). Alimentos (ODEPA), AFP (Superintendencia de Pensiones), las series del Banco Central, la bencina y el gas (CNE) y la tasa máxima convencional (CMF) vienen de fotos reales generadas con los scripts de `scripts/`. Todavía no hay base de datos ni actualización automática.
+> Estado: endpoints de todas las secciones con **datos de ejemplo** (`app/datos_ejemplo/`). Alimentos (ODEPA), AFP (Superintendencia de Pensiones), las series del Banco Central, la bencina y el gas (CNE) y la tasa máxima convencional (CMF) vienen de fotos reales que guarda en Supabase la ingesta (`python -m app.ingesta`, ver [docs/ingesta.md](../docs/ingesta.md)); si Supabase no responde, la API usa los JSON de respaldo de `app/datos_ejemplo/`.
 
 ## Requisitos
 
@@ -78,39 +78,17 @@ docker run -p 8000:8000 impacto-api
 | PUT | `/v1/yo/preferencias` | Guarda las preferencias de la cuenta (requiere sesión) |
 | DELETE | `/v1/yo` | Borra la cuenta y sus datos (requiere sesión) |
 
-## Fotos de datos reales (borradores de conectores)
+## Ingesta de datos reales
 
-Generan los JSON que usan los datos de ejemplo. Son el punto de partida de los conectores del worker.
-
-ODEPA (precios al consumidor). Primero descarga el CSV del año desde datos.odepa.gob.cl:
+Los conectores están en `app/ingesta/` (Banco Central, CNE, CMF, ODEPA y Superintendencia de Pensiones). Descargan cada fuente, guardan la foto y la historia en Supabase y registran cada corrida. Usan las claves del `.env` (`BCCH_TOKEN`, `CNE_EMAIL`, `CNE_PASSWORD`, `CMF_API_KEY`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`).
 
 ```bash
-.venv/Scripts/python scripts/snapshot_odepa.py precio_consumidor_2026.csv app/datos_ejemplo/odepa_snapshot.json
+.venv/Scripts/python -m app.ingesta              # todas las fuentes
+.venv/Scripts/python -m app.ingesta bcch cmf     # solo algunas
+.venv/Scripts/python -m app.ingesta --json       # además actualiza los JSON de respaldo
 ```
 
-Superintendencia de Pensiones (valor cuota de los fondos A a E; descarga sola):
-
-```bash
-.venv/Scripts/python scripts/snapshot_afp.py 2026 app/datos_ejemplo/afp_snapshot.json
-```
-
-Banco Central (16 series principales, 6 años; usa `BCCH_TOKEN` del `.env`). Para actualizar los datos reales, vuelve a correrlo:
-
-```bash
-.venv/Scripts/python scripts/snapshot_bcch.py app/datos_ejemplo/bcch_snapshot.json
-```
-
-CNE (precio de hoy de la bencina por región e historia mensual de combustibles y gas; usa `CNE_EMAIL` y `CNE_PASSWORD` del `.env`):
-
-```bash
-.venv/Scripts/python scripts/snapshot_cne.py app/datos_ejemplo/cne_snapshot.json
-```
-
-CMF (tasa máxima convencional de los últimos 6 años, en todos sus tramos; usa `CMF_API_KEY` del `.env`):
-
-```bash
-.venv/Scripts/python scripts/snapshot_cmf.py app/datos_ejemplo/cmf_snapshot.json
-```
+La API revisa cada 15 minutos (`REVISAR_FOTOS_MINUTOS`) si hay fotos nuevas y se recarga sola. `GET /salud` muestra qué foto usa de cada fuente. Con `FOTOS_DESDE=archivos` usa solo los JSON de respaldo. Detalle en [docs/ingesta.md](../docs/ingesta.md).
 
 INE, Encuesta de Presupuestos Familiares (resumen del Gran Santiago a partir de la base de gastos, descargada a `.cache/epf/`; ver docs/catalogo-de-datos.md):
 

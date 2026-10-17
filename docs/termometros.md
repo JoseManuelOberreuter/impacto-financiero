@@ -120,8 +120,8 @@ Termómetros
 
 **Datos reales y de ejemplo en estas páginas:**
 - **Reales**, como foto fija:
-  - Precios de alimentos de ODEPA (semana al 9-oct-2026). Se generan con `impacto-api/scripts/snapshot_odepa.py`.
-  - Rentabilidad de las AFP, provisional al 13-oct-2026. Se genera con `impacto-api/scripts/snapshot_afp.py`.
+  - Precios de alimentos de ODEPA (semana al 9-oct-2026). Se generan con `impacto-api/app/ingesta/odepa.py`.
+  - Rentabilidad de las AFP, provisional al 13-oct-2026. Se genera con `impacto-api/app/ingesta/afp.py`.
   - Tarifa del Metro.
 - **De ejemplo:** IPC, TPM, desempleo, IMACEC, dólar, bencina, gas, tono de las noticias y titulares. Los titulares no se atribuyen a medios reales.
 

@@ -37,10 +37,10 @@
   - `noticias`, `clasificaciones_noticias`;
   - `lecturas_termometro`.
 - [ ] **Migraciones** versionadas en el repo del backend.
-- [ ] **Worker** con tareas programadas (cron de Railway), separado del proceso de la API.
-- [ ] **Estructura común de conector:** descargar → guardar crudo → normalizar → guardar. Con reintentos, registro en `corridas_ingesta` y alerta si una fuente falla varias veces.
+- [x] **Worker de ingesta** (`python -m app.ingesta`, [ingesta.md](ingesta.md)). Falta programarlo como cron en Railway.
+- [x] **Estructura común de conector:** `generar()` (la foto) y `series()` (la historia), con registro en `corridas_ingesta`. Falta: reintentos y alerta si una fuente falla varios días.
 - [ ] **Guardar los archivos crudos** en Supabase Storage para poder reprocesar.
-- [ ] **La API lee de la base** en vez de los datos de ejemplo. Mantener un modo de ejemplo para desarrollo sin claves.
+- [x] **La API lee de la base** (tabla `fotos`) y se recarga sola; si Supabase no responde usa los JSON de respaldo (`FOTOS_DESDE=archivos` para desarrollo sin claves).
 - [ ] **Variables de entorno** para todas las claves; nunca en el código.
 - [ ] Desplegar API + worker en **Railway** y la web en **Vercel**.
 
@@ -48,11 +48,11 @@
 
 | Prioridad | Conector | Frecuencia | Nota |
 |---|---|---|---|
-| 1 | Banco Central (BDE) | Diaria + calendario de publicaciones | Catálogo listo en [banco-central-series.md](banco-central-series.md). `scripts/snapshot_bcch.py` ya descarga 16 series a un JSON: **falta que guarde en Supabase** y correrlo a diario en el worker |
-| 1 | ODEPA | Semanal (viernes) | Convertir `snapshot_odepa.py` en conector |
-| 1 | Superintendencia de Pensiones (valor cuota) | Diaria | Convertir `snapshot_afp.py`; reprocesar los datos provisionales cuando se confirmen |
-| 1 | CMF (TMC, tasas, UTM) | Diaria / mensual | `scripts/snapshot_cmf.py` ya descarga 6 años de la TMC en todos sus tramos. **Falta guardarla en Supabase** |
-| 2 | CNE (bencina y gas) | Diaria | `scripts/snapshot_cne.py` ya hace la foto (mediana de estaciones frescas e historia mensual). **Falta guardarla en Supabase y correrla a diario** para tener historia semanal |
+| 1 | Banco Central (BDE) | Diaria + calendario de publicaciones | Catálogo listo en [banco-central-series.md](banco-central-series.md). **En Supabase** con `app/ingesta/bcch.py` (21 series). Falta el cron diario |
+| 1 | ODEPA | Semanal (viernes) | **En Supabase** con `app/ingesta/odepa.py`, que descarga solo el CSV del año |
+| 1 | Superintendencia de Pensiones (valor cuota) | Diaria | Conector listo (`app/ingesta/afp.py`), pero el 17-oct su sitio de descargas no respondía. Falta reprocesar los datos provisionales cuando se confirmen |
+| 1 | CMF (TMC, tasas, UTM) | Diaria / mensual | **En Supabase** con `app/ingesta/cmf.py` (6 años, 14 tramos) |
+| 2 | CNE (bencina y gas) | Diaria | **En Supabase** con `app/ingesta/cne.py`; la mediana de las estaciones se guarda un punto por día. Falta el cron diario para que la historia crezca |
 | 2 | ENAP / CNE (paridad MEPCO) | Semanal | Para el aviso "la bencina debería subir o bajar" |
 | 2 | Seguro de cesantía | Mensual | Indicador adelantado de empleo |
 | 2 | CMF hechos esenciales | Diaria | Desde las alertas por correo |
