@@ -17,8 +17,19 @@ const Contexto = createContext<ValorContexto>({
   cambiarPreferencia: () => {},
 });
 
+/** En web se lee al tiro de localStorage (donde la guarda AsyncStorage), para no partir en claro. */
+function guardadaEnWeb(): PreferenciaTema {
+  if (Platform.OS !== 'web' || typeof window === 'undefined') return 'automatico';
+  try {
+    const guardada = window.localStorage.getItem(CLAVE);
+    return guardada === 'claro' || guardada === 'oscuro' ? guardada : 'automatico';
+  } catch {
+    return 'automatico';
+  }
+}
+
 export function ProveedorTema({ children }: { children: ReactNode }) {
-  const [preferencia, setPreferencia] = useState<PreferenciaTema>('automatico');
+  const [preferencia, setPreferencia] = useState<PreferenciaTema>(guardadaEnWeb);
 
   useEffect(() => {
     AsyncStorage.getItem(CLAVE)

@@ -1,5 +1,6 @@
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
-import { StyleSheet, View } from 'react-native';
+import { useEffect } from 'react';
+import { Platform, StyleSheet, View } from 'react-native';
 
 import { AvisoEjemplo } from '@/components/aviso-ejemplo';
 import { SelectorPais } from '@/components/selector-pais';
@@ -25,6 +26,16 @@ export default function RootLayout() {
 
 function Navegacion() {
   const colorScheme = useColorScheme();
+
+  // Web: +html.tsx oculta el contenido mientras la página estática (clara) no se vuelve a dibujar
+  // con el tema oscuro. Se muestra después del primer cuadro ya hidratado.
+  useEffect(() => {
+    if (Platform.OS !== 'web' || typeof document === 'undefined') return;
+    const cuadro = requestAnimationFrame(() =>
+      requestAnimationFrame(() => document.documentElement.classList.remove('tema-pendiente')),
+    );
+    return () => cancelAnimationFrame(cuadro);
+  }, []);
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <View style={styles.contenedor}>
