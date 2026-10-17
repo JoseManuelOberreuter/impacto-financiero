@@ -76,13 +76,27 @@ Termómetros
 - **Marca "Impacto Financiero":** en la web, desde 1.100 px de ancho, va fija arriba a la izquierda, fuera del menú y a la altura de la bandera (`components/app-tabs.web.tsx`); el menú tiene el ancho del contenido y sus 5 secciones quedan centradas. Entre 768 y 1.100 px la marca vuelve a la izquierda dentro del menú, para que no choquen.
 - **Encabezado del Inicio:** en escritorio, "Hoy en Chile" va en la misma fila que la fecha; en el teléfono, la fila lleva "Impacto Financiero" y la fecha (con espacio para la bandera), y "Hoy en Chile" queda sobre el titular.
 - **Impacto Financiero** (desde el 16-oct-2026): reemplaza a la tarjeta de la canasta como protagonista del Inicio. En el Inicio va solo la cifra (cuánto más le cuesta la vida a un hogar típico de Santiago que hace un año); el detalle por rubro y "Calcular el mío" están en su termómetro (`/termometros/impacto`). Metodología: [impacto-financiero.md](impacto-financiero.md).
-- **"Lo que cambió esta semana"** (`cambios` en `GET /v1/home`), desde el 16-oct-2026: **todos los datos compiten** y se muestran los que más presionan. Código: `_candidatos` y `_cambios` en `impacto-api/app/datos_ejemplo/home.py`.
-  - **Candidatos (15):** bencina 95, gas licuado 15 kg, el alimento que más se movió en la semana, dólar, cobre, petróleo WTI, UF, tasa máxima de los créditos, TPM, tasa hipotecaria, IPC, desempleo, IMACEC, percepción de las personas (IPEC) y confianza de las empresas (IMCE).
-  - **Orden:** presión alta primero, después media y baja. En cada nivel, los que se movieron van antes que los estables.
-  - **Límites:** hasta 7 filas, máximo 2 por tema (energía, alimentos, afuera, deudas, precios, empleo, ánimo) y un solo alimento, porque la canasta ya los resume.
-  - **Datos mensuales** (IPC, desempleo, IMACEC, IPEC, IMCE): entran solo con presión alta. **Pendiente:** que entren también la semana en que se publican, cuando guardemos la fecha de publicación de cada dato.
+- **"Lo que cambió esta semana"** (`cambios` en `GET /v1/home`): **los datos anclados por el usuario van siempre primero** (con un pin junto al nombre), y el resto lo completa **lo que más se movió**. Código: `_candidatos` y `_cambios` en `impacto-api/app/datos_ejemplo/home.py`.
+  - **Por movimiento, no por presión** (desde el 16-oct-2026): la presión mide qué tan lejos de lo normal está el **nivel** (la bencina lleva meses cara); el movimiento mide qué tan **inusual fue el último cambio** comparado con lo que ese dato suele moverse. Como la sección se llama "lo que cambió", ordena por movimiento. La presión sigue en los termómetros y en "Todos los datos".
+  - **Cálculo** (`app/calculos/movimiento.py`): movimiento = |cambio actual| ÷ desviación estándar de sus cambios históricos, con el mismo cambio que muestra la fila (semanal para dólar, cobre, petróleo y alimentos; mensual para UF, tasas, bencina, gas e indicadores). Se lee como "veces lo habitual". Cada dato lo trae en el campo `movimiento`.
+  - **Candidatos:** los 24 datos de "Todos los datos" (bencina, gas, los 10 alimentos, dólar, cobre, petróleo, UF, tasa máxima, TPM, tasa hipotecaria, IPC, desempleo, IMACEC, IPEC e IMCE).
+  - **Límites:** hasta 7 filas, máximo 2 por tema (energía, afuera, deudas, precios, empleo, ánimo) y **un solo alimento**, porque la canasta ya los resume.
+  - **Datos mensuales** (IPC, desempleo, IMACEC, IPEC, IMCE): entran solo si su último cambio fue inusual (movimiento ≥ 1); si no, aparecerían todo el mes con el mismo cambio. **Pendiente:** que entren la semana en que se publican, cuando guardemos su fecha de publicación.
+  - **Alimentos:** su historia es de 12 semanas (ODEPA), así que su "lo habitual" es menos preciso hasta guardar más.
   - **Bencina:** se compara con el último mes con dato de la CNE hasta guardar el precio diario.
-  - **Color:** según la presión sobre el bolsillo. Un alimento que sube = alta; uno que baja = baja; un cambio menor a 0,5 % = estable.
+  - **Colores (desde el 16-oct-2026):** cada fila separa dos ideas.
+    - **Flecha y su color = si el movimiento conviene al bolsillo:** verde si conviene, rojo si no, gris si depende de quién seas o si no se movió (campo `tono`).
+    - **Presión = texto** bajo el mini gráfico ("Presión alta"), con su color, **solo en "Todos los datos"**. En el Inicio no se muestra, porque casi todos los que entran tienen presión alta.
+    - **Mini gráfico** en azul, neutro.
+    - **Qué es "bueno" para cada dato** (campo `efecto`):
+
+      | Si sube, para el bolsillo es… | Datos |
+      |---|---|
+      | Malo (`sube_malo`) | Bencina, gas, alimentos, UF, tasas de crédito, tasa máxima, TPM, IPC, desempleo |
+      | Bueno (`sube_bueno`) | IMACEC, percepción de las personas, confianza de las empresas |
+      | Neutro (`neutro`) | Dólar, cobre, petróleo: perjudican a unos y benefician a otros |
+- **Anclados:** el usuario ancla datos desde "Todos los datos"; se guardan en el dispositivo (`hooks/use-anclados.tsx`) y la app los manda a `GET /v1/home?anclados=dolar,uf`. Van primero, en el orden en que se anclaron, y cuentan dentro de las 7 filas. Límite: **3 en el plan gratis**, sin límite en Pro (capacidad `datos.anclados`).
+- **"Todos los datos"** (`/termometros/datos`, `GET /v1/datos`): los 24 datos (incluidos los 10 alimentos de ODEPA), y cuatro formas de ordenarlos: **Más presión** (la de entrada), **Menos presión**, **Me convienen** y **No me convienen**. Siempre se ven los 24: cada opción solo cambia el orden (se probaron filtros que escondían datos y confundían). Cada fila tiene el botón para anclar. Se llega desde "Ver todos los datos" bajo la lista del Inicio y desde el primer elemento de la pestaña Termómetros. Ahí los anclados no cambian el orden.
   - **Enlace:** cada fila lleva a su detalle.
 - **Descartados:** el panel de presión como protagonista (B) y el carrusel tipo historias (D).
 - **Mi AFP** no está en el Inicio por ahora, para no sobrecargarlo.

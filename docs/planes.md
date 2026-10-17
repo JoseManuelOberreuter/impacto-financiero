@@ -37,6 +37,7 @@ Así, mover una función de plan, regalarla en una promoción o crear un plan nu
 | `precios.vs_ipc` | Nuestra canasta vs. el IPC de alimentos | — | Sí | Sí |
 | `aviso_bencina` | Estimación de la próxima variación de la bencina | — | Sí | Sí |
 | `mi_impacto` | Mi impacto completo en pesos: bencina, sueldo y AFP (el dividendo es la vista previa gratis). Ver [plan-pro.md](plan-pro.md) | Vista previa | Sí | Sí |
+| `datos.anclados` | Datos anclados arriba en "Lo que cambió esta semana" (con límite) | 3 | Sin límite | Sin límite |
 | `calculadoras.basicas` | Dividendo, crédito y sueldo vs. inflación con tasas reales | Sí | Sí | Sí |
 | `calculadoras.escenarios` | Calculadoras con escenarios de TPM e inflación esperadas | — | Sí | Sí |
 | `alertas` | Avisos de umbrales y publicaciones (con límite) | — | 10 | 50 |

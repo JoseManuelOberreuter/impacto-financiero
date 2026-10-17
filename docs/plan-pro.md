@@ -48,6 +48,8 @@ El usuario ingresa sus datos una vez y la app le dice **en pesos** cuánto le af
 
 ### 4. Alertas (el motivo para mantener la suscripción)
 
+- **Sobre los datos anclados:** quien ancla un dato (gratis, hasta 3) puede pedir que le avisen cuando se mueva; las alertas son Pro, y en Pro los anclados no tienen límite.
+
 - **Umbrales:** "avísame si el dólar pasa de $1.000" o "si la tasa hipotecaria baja de 4 %".
 - **Publicaciones:** "salió el desempleo: 9,6 %, sobre lo esperado".
 - **Personales:** "tu dividendo sube $X el próximo mes", "tu fondo cayó más de 3 % esta semana".
