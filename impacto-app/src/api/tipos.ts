@@ -43,6 +43,8 @@ export type TermometroDetalle = Termometro & {
   proximas_publicaciones: Publicacion[];
   metodologia: string;
   herramienta_relacionada: string | null;
+  /** Solo en el termómetro Impacto Financiero: el detalle por rubro. */
+  impacto?: ImpactoFinanciero | null;
 };
 
 export type PuntoPrecio = { semana: string; precio: number };
@@ -144,6 +146,7 @@ export type Home = {
   generado_el: string;
   datos_de_ejemplo: boolean;
   resumen: { titulo: string; texto: string };
+  impacto: ImpactoFinanciero;
   canasta: Canasta;
   cambios: CambioSemana[];
   termometros: Termometro[];
@@ -186,4 +189,26 @@ export type ReferenciasMiImpacto = {
     region: string;
     fuente: string;
   };
+};
+
+/** Impacto Financiero: la inflación en pesos para un hogar típico (docs/impacto-financiero.md). */
+export type RubroImpacto = {
+  id: string;
+  nombre: string;
+  gasto_mes: number;
+  diferencia_anual: number;
+  diferencia_mensual: number;
+  variacion_anual: number;
+};
+
+export type ImpactoFinanciero = {
+  periodo: string;
+  hogar: string;
+  gasto_mes: number;
+  diferencia_anual: number;
+  variacion_anual: number;
+  diferencia_mensual: number;
+  rubros: RubroImpacto[];
+  fuente: string;
+  metodologia: string;
 };

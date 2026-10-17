@@ -4,6 +4,7 @@ import { StyleSheet, View } from 'react-native';
 import type { Indicador, TermometroDetalle } from '@/api/tipos';
 import { Encabezado } from '@/components/encabezado';
 import { Fila } from '@/components/fila';
+import { DetalleImpacto } from '@/components/impacto-financiero';
 import { MiniGrafico } from '@/components/mini-grafico';
 import { NivelPresion } from '@/components/nivel-presion';
 import { ContenidoApi, Pagina } from '@/components/pagina';
@@ -43,6 +44,12 @@ function Detalle({ termometro: t }: { termometro: TermometroDetalle }) {
         <ThemedText style={styles.dato}>{t.dato_clave}</ThemedText>
         <ThemedText style={styles.explicacion}>{t.explicacion}</ThemedText>
       </View>
+
+      {t.impacto && (
+        <Seccion titulo="En qué se va la diferencia">
+          <DetalleImpacto impacto={t.impacto} />
+        </Seccion>
+      )}
 
       <Seccion titulo="Indicadores">
         {t.indicadores.map((indicador) => (

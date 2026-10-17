@@ -29,3 +29,8 @@ export function mesYAnio(iso: string): string {
   const { anio, mes } = partes(iso);
   return `${MESES_LARGOS[mes - 1]} de ${anio}`;
 }
+
+/** "2026-09-01" → "septiembre" */
+export function mesLargo(iso: string): string {
+  return MESES_LARGOS[partes(iso).mes - 1];
+}

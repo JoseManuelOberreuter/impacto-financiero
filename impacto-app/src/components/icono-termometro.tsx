@@ -7,11 +7,13 @@ import {
   PiggyBank,
   ShoppingCart,
   Users,
+  Wallet,
   type LucideIcon,
   type LucideProps,
 } from 'lucide-react-native';
 
 const ICONOS: Record<string, LucideIcon> = {
+  impacto: Wallet,
   bolsillo: ShoppingCart,
   deudas: Landmark,
   ahorro: PiggyBank,

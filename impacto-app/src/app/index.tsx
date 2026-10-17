@@ -1,7 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 
 import type { Home } from '@/api/tipos';
-import { CanastaCompacta } from '@/components/canasta-compacta';
+import { TarjetaImpacto } from '@/components/impacto-financiero';
 import { ListaCambios } from '@/components/lista-cambios';
 import { ContenidoApi, Pagina } from '@/components/pagina';
 import { Seccion } from '@/components/seccion';
@@ -50,7 +50,7 @@ function Contenido({ home }: { home: Home }) {
         <ThemedText themeColor="textSecondary">{home.resumen.texto}</ThemedText>
       </View>
 
-      <CanastaCompacta canasta={home.canasta} />
+      <TarjetaImpacto impacto={home.impacto} />
 
       <Seccion titulo="Lo que cambió esta semana">
         <ListaCambios cambios={home.cambios} />
