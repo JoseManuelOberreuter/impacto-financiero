@@ -2,14 +2,14 @@ import { StyleSheet, View } from 'react-native';
 
 import type { Presion, Tendencia } from '@/api/tipos';
 import { ThemedText } from '@/components/themed-text';
-import { PRESION, TENDENCIA } from '@/constants/presion';
+import { COLOR_DIRECCION, PRESION, TENDENCIA } from '@/constants/presion';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 type Props = {
   presion: Presion;
   tendencia?: Tendencia;
-  /** Texto a mostrar; por defecto "Presión baja/media/alta". */
+  /** Frase a mostrar ("La vida está más cara que lo normal"); por defecto "Normal" o el nivel. */
   etiqueta?: string;
   conFondo?: boolean;
 };
@@ -22,9 +22,11 @@ export function NivelPresion({ presion, tendencia, etiqueta, conFondo = true }: 
 
   return (
     <View style={[styles.chip, conFondo && { backgroundColor: theme[nivel.fondo] }, conFondo && styles.conFondo]}>
-      {IconoTendencia && <IconoTendencia size={14} color={theme[nivel.color]} strokeWidth={2.5} />}
+      {IconoTendencia && tendencia && (
+        <IconoTendencia size={14} color={theme[COLOR_DIRECCION[tendencia]]} strokeWidth={2.5} />
+      )}
       <ThemedText type="smallBold" themeColor={nivel.color}>
-        {etiqueta ?? `Presión ${nivel.texto.toLowerCase()}`}
+        {etiqueta ?? (presion === 'media' ? 'Normal' : nivel.texto)}
       </ThemedText>
     </View>
   );

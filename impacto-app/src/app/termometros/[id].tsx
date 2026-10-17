@@ -115,7 +115,7 @@ function TarjetaIndicador({ indicador }: { indicador: Indicador }) {
         <ThemedText type="smallBold" style={styles.nombreIndicador}>
           {indicador.nombre}
         </ThemedText>
-        <NivelPresion presion={indicador.presion} />
+        <NivelPresion presion={indicador.presion} etiqueta={indicador.estado ?? undefined} />
       </View>
       <View style={styles.filaValor}>
         <ThemedText style={styles.valorIndicador}>{indicador.valor}</ThemedText>

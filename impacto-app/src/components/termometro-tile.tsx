@@ -5,7 +5,7 @@ import type { Termometro } from '@/api/tipos';
 import { IconoTermometro } from '@/components/icono-termometro';
 import { ThemedText } from '@/components/themed-text';
 import { Vidrio } from '@/components/vidrio';
-import { PRESION, TENDENCIA } from '@/constants/presion';
+import { COLOR_DIRECCION, PRESION, TENDENCIA } from '@/constants/presion';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
@@ -34,13 +34,10 @@ export function TermometroTile({ termometro }: { termometro: Termometro }) {
             {termometro.nombre}
           </ThemedText>
           <View style={styles.nivel}>
-            <ThemedText type="small" themeColor="textSecondary">
-              Presión
+            <IconoTendencia size={14} color={theme[COLOR_DIRECCION[termometro.tendencia]]} strokeWidth={2.5} />
+            <ThemedText type="smallBold" themeColor={presion.color} numberOfLines={2} style={styles.estado}>
+              {termometro.etiqueta_presion}
             </ThemedText>
-            <ThemedText type="smallBold" themeColor={presion.color}>
-              {presion.texto}
-            </ThemedText>
-            <IconoTendencia size={14} color={theme[presion.color]} strokeWidth={2.5} />
           </View>
         </Vidrio>
       </Pressable>
@@ -69,7 +66,12 @@ const styles = StyleSheet.create({
   },
   nivel: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     gap: Spacing.one,
+  },
+  estado: {
+    flex: 1,
+    fontSize: 13,
+    lineHeight: 17,
   },
 });

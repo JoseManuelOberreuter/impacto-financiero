@@ -11,27 +11,26 @@ import { useAnclados } from '@/hooks/use-anclados';
 import { useApi } from '@/hooks/use-api';
 import { useTheme } from '@/hooks/use-theme';
 
-type Orden = 'mas' | 'menos' | 'convienen' | 'no_convienen';
+type Orden = 'movimiento' | 'sobre' | 'bajo';
 
 // Siempre se ven todos los datos: cada opción solo cambia el orden.
 const ORDENES: { id: Orden; etiqueta: string }[] = [
-  { id: 'mas', etiqueta: 'Más presión' },
-  { id: 'menos', etiqueta: 'Menos presión' },
-  { id: 'convienen', etiqueta: 'Me convienen' },
-  { id: 'no_convienen', etiqueta: 'No me convienen' },
+  { id: 'movimiento', etiqueta: 'Lo que más se movió' },
+  { id: 'sobre', etiqueta: 'Sobre lo normal' },
+  { id: 'bajo', etiqueta: 'Bajo lo normal' },
 ];
 
-const PRIMERO: Record<'convienen' | 'no_convienen', CambioSemana['tono'][]> = {
-  convienen: ['favorable', 'neutral', 'desfavorable'],
-  no_convienen: ['desfavorable', 'neutral', 'favorable'],
+const PRIMERO: Record<'sobre' | 'bajo', CambioSemana['nivel'][]> = {
+  sobre: ['sobre', 'normal', 'bajo'],
+  bajo: ['bajo', 'normal', 'sobre'],
 };
 
-/** La API los entrega de más a menos presión; el orden es estable dentro de cada grupo. */
+/** Dentro de cada grupo, lo que más se movió va primero. */
 function ordenar(datos: CambioSemana[], orden: Orden): CambioSemana[] {
-  if (orden === 'mas') return datos;
-  if (orden === 'menos') return [...datos].reverse();
+  const porMovimiento = [...datos].sort((a, b) => b.movimiento - a.movimiento);
+  if (orden === 'movimiento') return porMovimiento;
   const prioridad = PRIMERO[orden];
-  return [...datos].sort((a, b) => prioridad.indexOf(a.tono) - prioridad.indexOf(b.tono));
+  return porMovimiento.sort((a, b) => prioridad.indexOf(a.nivel) - prioridad.indexOf(b.nivel));
 }
 
 export default function DatosScreen() {
@@ -54,7 +53,7 @@ export default function DatosScreen() {
 function Contenido({ datos }: { datos: CambioSemana[] }) {
   const theme = useTheme();
   const { limite, anclados } = useAnclados();
-  const [orden, setOrden] = useState<Orden>('mas');
+  const [orden, setOrden] = useState<Orden>('movimiento');
   const [avisoLimite, setAvisoLimite] = useState(false);
   const visibles = ordenar(datos, orden);
 

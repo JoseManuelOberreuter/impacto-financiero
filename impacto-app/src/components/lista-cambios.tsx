@@ -6,8 +6,8 @@ import type { CambioSemana, Tendencia } from '@/api/tipos';
 import { MiniGrafico } from '@/components/mini-grafico';
 import { ThemedText } from '@/components/themed-text';
 import { Vidrio } from '@/components/vidrio';
-import { PRESION } from '@/constants/presion';
-import { Spacing, type ThemeColor } from '@/constants/theme';
+import { COLOR_DIRECCION, FONDO_DIRECCION } from '@/constants/presion';
+import { Spacing } from '@/constants/theme';
 import { useAnclados } from '@/hooks/use-anclados';
 import { useTheme } from '@/hooks/use-theme';
 
@@ -17,23 +17,15 @@ const FLECHA: Record<Tendencia, LucideIcon> = {
   estable: Minus,
 };
 
-// La flecha dice si el movimiento conviene al bolsillo (verde), no conviene (rojo) o depende (gris).
-// La presión va aparte, escrita: "bajó, pero sigue cara" se lee como ↘ verde + "Presión alta".
-const TONO: Record<CambioSemana['tono'], { color: ThemeColor; fondo: ThemeColor }> = {
-  favorable: { color: 'presionBaja', fondo: 'presionBajaFondo' },
-  desfavorable: { color: 'presionAlta', fondo: 'presionAltaFondo' },
-  neutral: { color: 'textSecondary', fondo: 'backgroundSelected' },
-};
-
 type Props = {
   cambios: CambioSemana[];
-  /** Muestra el botón para anclar o desanclar cada dato y la presión escrita ("Todos los datos"). */
+  /** Muestra el botón para anclar o desanclar cada dato ("Todos los datos"). */
   anclable?: boolean;
   /** Se llama cuando no se pudo anclar por el límite del plan. */
   onLimite?: () => void;
 };
 
-/** Lista de datos: flecha, nombre, detalle y mini gráfico por fila (y la presión en la lista completa). */
+/** Lista de datos: flecha, nombre, detalle, mini gráfico y si está sobre o bajo lo normal. */
 export function ListaCambios({ cambios, anclable, onLimite }: Props) {
   const theme = useTheme();
 
@@ -66,8 +58,9 @@ function FilaCambio({
   const theme = useTheme();
   const { estaAnclado, alternar } = useAnclados();
   const anclado = estaAnclado(cambio.id);
-  const tono = TONO[cambio.tono];
-  const presion = PRESION[cambio.presion];
+  // Flecha y gráfico como en cualquier app de activos: sube verde, baja rojo, sin cambio gris.
+  const color = COLOR_DIRECCION[cambio.direccion];
+  const fondo = FONDO_DIRECCION[cambio.direccion];
   const Flecha = FLECHA[cambio.direccion];
 
   return (
@@ -80,8 +73,8 @@ function FilaCambio({
       <Link href={cambio.enlace as Href} asChild>
         <Pressable accessibilityLabel={`${cambio.nombre}: ${cambio.detalle}`} style={styles.enlace}>
           <View style={styles.contenido}>
-            <View style={[styles.icono, { backgroundColor: theme[tono.fondo] }]}>
-              <Flecha size={17} color={theme[tono.color]} strokeWidth={2.25} />
+            <View style={[styles.icono, { backgroundColor: theme[fondo] }]}>
+              <Flecha size={17} color={theme[color]} strokeWidth={2.25} />
             </View>
             <View style={styles.textos}>
               <View style={styles.titulo}>
@@ -99,14 +92,12 @@ function FilaCambio({
             <View style={styles.derecha}>
               {/* El gráfico toma el ancho de su contenedor: con alignItems flex-end quedaría en 0. */}
               <View style={styles.grafico}>
-                <MiniGrafico valores={cambio.serie} color={theme.accent} alto={26} />
+                <MiniGrafico valores={cambio.serie} color={theme[color]} alto={26} />
               </View>
-              {/* En el Inicio casi todos tienen presión alta: la etiqueta solo aporta en la lista completa. */}
-              {anclable && (
-                <ThemedText type="small" style={[styles.presion, { color: theme[presion.color] }]}>
-                  Presión {presion.texto.toLowerCase()}
-                </ThemedText>
-              )}
+              {/* Comparado con los últimos 5 años, en palabras ("Más cara que lo normal"). */}
+              <ThemedText type="small" themeColor="textSecondary" style={styles.presion} numberOfLines={2}>
+                {cambio.estado}
+              </ThemedText>
             </View>
           </View>
         </Pressable>
@@ -176,7 +167,7 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   derecha: {
-    width: 76,
+    width: 96,
     alignItems: 'flex-end',
     gap: Spacing.half,
   },
@@ -186,6 +177,7 @@ const styles = StyleSheet.create({
   presion: {
     fontSize: 11,
     lineHeight: 14,
+    textAlign: 'right',
   },
   pin: {
     padding: Spacing.one,

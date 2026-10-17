@@ -10,6 +10,19 @@ export const PRESION: Record<Presion, { texto: string; color: ThemeColor; fondo:
   alta: { texto: 'Alta', color: 'presionAlta', fondo: 'presionAltaFondo' },
 };
 
+// Como en cualquier app de activos: sube en verde, baja en rojo, sin cambio en gris.
+export const COLOR_DIRECCION: Record<Tendencia, ThemeColor> = {
+  sube: 'presionBaja',
+  baja: 'presionAlta',
+  estable: 'textSecondary',
+};
+
+export const FONDO_DIRECCION: Record<Tendencia, ThemeColor> = {
+  sube: 'presionBajaFondo',
+  baja: 'presionAltaFondo',
+  estable: 'backgroundSelected',
+};
+
 export const TENDENCIA: Record<Tendencia, { icono: LucideIcon; texto: string }> = {
   sube: { icono: TrendingUp, texto: 'sube' },
   baja: { icono: TrendingDown, texto: 'baja' },
