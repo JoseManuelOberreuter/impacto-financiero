@@ -1,7 +1,8 @@
 import { Check, Circle, Eye, EyeOff } from 'lucide-react-native';
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import {
   ActivityIndicator,
+  Platform,
   Pressable,
   StyleSheet,
   TextInput,
@@ -24,10 +25,33 @@ type PropsCampo = Omit<TextInputProps, 'style' | 'onChangeText' | 'value'> & {
   error?: string | null;
 };
 
+/**
+ * En web, el autocompletado del navegador pinta el campo con su propio fondo claro y rectangular.
+ * Esta regla lo tapa con el color de la caja y el texto del tema, que cambian con la apariencia.
+ */
+function useAutocompletarConTema(fondo: string, texto: string) {
+  useEffect(() => {
+    if (Platform.OS !== 'web' || typeof document === 'undefined') return;
+    const id = 'estilo-autocompletar';
+    const etiqueta = document.getElementById(id) ?? document.head.appendChild(document.createElement('style'));
+    etiqueta.id = id;
+    etiqueta.textContent = `
+      input:-webkit-autofill,
+      input:-webkit-autofill:hover,
+      input:-webkit-autofill:focus {
+        -webkit-box-shadow: 0 0 0 1000px ${fondo} inset !important;
+        box-shadow: 0 0 0 1000px ${fondo} inset !important;
+        -webkit-text-fill-color: ${texto} !important;
+        caret-color: ${texto};
+      }`;
+  }, [fondo, texto]);
+}
+
 /** Campo de texto con etiqueta, estilo de la app y, si es contraseña, "Mostrar". */
 export function CampoTexto({ etiqueta, valor, onCambiar, clave, error, ...props }: PropsCampo) {
   const theme = useTheme();
   const [visible, setVisible] = useState(false);
+  useAutocompletarConTema(theme.backgroundSelected, theme.text);
 
   return (
     <View style={styles.campo}>
