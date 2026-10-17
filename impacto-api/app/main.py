@@ -16,7 +16,7 @@ origenes = os.getenv("CORS_ORIGINS", "http://localhost:8081").split(",")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[o.strip() for o in origenes],
-    allow_methods=["GET"],
+    allow_methods=["GET", "PUT", "DELETE"],
     allow_headers=["*"],
 )
 
