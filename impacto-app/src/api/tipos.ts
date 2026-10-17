@@ -203,6 +203,8 @@ export type RubroImpacto = {
 
 export type ImpactoFinanciero = {
   periodo: string;
+  /** Fecha del dato más reciente: la bencina y la UF se actualizan a diario. */
+  actualizado_al: string;
   hogar: string;
   gasto_mes: number;
   diferencia_anual: number;

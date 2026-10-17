@@ -8,7 +8,7 @@ import { ThemedText } from '@/components/themed-text';
 import { Vidrio } from '@/components/vidrio';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { mesLargo } from '@/utils/fechas';
+import { fechaCorta } from '@/utils/fechas';
 import { pesos, porcentaje } from '@/utils/numeros';
 
 function conSigno(valor: number): string {
@@ -25,7 +25,7 @@ export function TarjetaImpacto({ impacto }: { impacto: ImpactoFinanciero }) {
       <Pressable>
         <Vidrio style={styles.tarjeta}>
           <ThemedText type="small" themeColor="textSecondary">
-            Impacto Financiero · {mesLargo(impacto.periodo)}
+            Impacto Financiero · al {fechaCorta(impacto.actualizado_al)}
           </ThemedText>
           <View style={styles.cifra}>
             <ThemedText style={styles.total} themeColor={sube ? 'presionAlta' : 'presionBaja'}>

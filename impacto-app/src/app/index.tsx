@@ -35,17 +35,29 @@ function Contenido({ home }: { home: Home }) {
   return (
     <>
       <View style={styles.encabezado}>
-        {/* En escritorio la marca ya aparece en la barra de navegación. */}
-        {!esEscritorio && <ThemedText type="smallBold">Impacto</ThemedText>}
-        <ThemedText type="small" themeColor="textSecondary" style={styles.fecha}>
+        {/* En escritorio la marca ya está en la barra de navegación: "Hoy en Chile" sube a esta fila. */}
+        {esEscritorio ? (
+          <ThemedText type="small" themeColor="textSecondary">
+            Hoy en Chile
+          </ThemedText>
+        ) : (
+          <ThemedText type="smallBold">Impacto</ThemedText>
+        )}
+        {/* Fuera del escritorio, deja espacio al selector de país fijo en la esquina. */}
+        <ThemedText
+          type="small"
+          themeColor="textSecondary"
+          style={[styles.fecha, !esEscritorio && styles.fechaConBandera]}>
           {fechaLarga(home.generado_el)}
         </ThemedText>
       </View>
 
       <View style={styles.hero}>
-        <ThemedText type="small" themeColor="textSecondary">
-          Hoy en Chile
-        </ThemedText>
+        {!esEscritorio && (
+          <ThemedText type="small" themeColor="textSecondary">
+            Hoy en Chile
+          </ThemedText>
+        )}
         <ThemedText style={styles.titular}>{home.resumen.titulo}</ThemedText>
         <ThemedText themeColor="textSecondary">{home.resumen.texto}</ThemedText>
       </View>
@@ -78,6 +90,9 @@ const styles = StyleSheet.create({
   },
   fecha: {
     marginLeft: 'auto',
+  },
+  fechaConBandera: {
+    marginRight: 52,
   },
   hero: {
     gap: Spacing.two,
