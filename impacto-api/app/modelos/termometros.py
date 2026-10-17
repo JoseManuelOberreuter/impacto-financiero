@@ -59,9 +59,6 @@ class Indicador(BaseModel):
     banda_normal: BandaNormal | None = None
     fuente: str
     dato_al: date
-    estado: str | None = Field(
-        default=None, description="Dónde está comparado con lo normal, en palabras: \"Más cara que lo normal\""
-    )
 
 
 class Percepcion(BaseModel):

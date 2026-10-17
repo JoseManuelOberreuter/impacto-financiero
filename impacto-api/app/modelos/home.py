@@ -45,10 +45,6 @@ class CambioSemana(BaseModel):
     tema: str = Field(default="otros", description="energia, alimentos, afuera, deudas, precios, empleo o animo")
     efecto: Efecto = Efecto.neutro
     tono: Tono = Field(default=Tono.neutral, description="Calculado con la dirección y el efecto")
-    estado: str = Field(
-        default="Normal", description="Dónde está comparado con lo normal, en palabras: \"Más cara que lo normal\""
-    )
-    nivel: str = Field(default="normal", description="sobre, normal o bajo lo normal de los últimos 5 años")
     movimiento: float = Field(
         default=0.0,
         description="Qué tan inusual fue el último cambio: veces lo que el dato suele moverse",

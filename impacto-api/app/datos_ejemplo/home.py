@@ -9,7 +9,6 @@ la foto real de ODEPA (ver precios.py) y los termómetros de termometros.py.
 from dataclasses import dataclass
 from datetime import date
 
-from app.calculos import estado
 from app.calculos import movimiento as mov
 from app.calculos.presion import evaluar
 from app.datos_ejemplo import banco_central as bc
@@ -119,8 +118,6 @@ class Candidato:
                 "efecto": efecto,
                 "tono": _tono(self.fila.direccion, efecto),
                 "movimiento": round(_movimiento(self.fila.id), 2),
-                "estado": estado.del_dato(self.fila.id, self.fila.presion),
-                "nivel": estado.nivel(self.fila.id, self.fila.presion),
             }
         )
         object.__setattr__(self, "fila", fila)
