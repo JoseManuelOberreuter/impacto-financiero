@@ -42,6 +42,11 @@ SERIES = {
     "tasa_consumo": ("F022.CON.TIP.Z.NO.Z.D", "Tasa de créditos de consumo", "%"),
     "ipec": ("F089.IPE.IND.75M2.M", "Percepción económica (IPEC)", "puntos"),
     "imce": ("G089.IME.IND.A0.M", "Confianza empresarial (IMCE)", "puntos"),
+    # Para el Impacto Financiero (docs/impacto-financiero.md): IPC general como índice y por división.
+    "ipc_indice": ("G073.IPC.IND.2023.M", "IPC general, índice empalmado", "índice 2023=100"),
+    "ipc_alimentos": ("F074.IPC.IND.DIV10000.2023.C.M", "IPC de alimentos y bebidas no alcohólicas", "índice 2023=100"),
+    "ipc_vivienda": ("F074.IPC.IND.DIV40000.2023.C.M", "IPC de vivienda y servicios básicos", "índice 2023=100"),
+    "ipc_transporte": ("F074.IPC.IND.DIV70000.2023.C.M", "IPC de transporte", "índice 2023=100"),
     "ipc_esperado_11m": ("F089.IPC.V12.14.M", "Inflación esperada en 11 meses", "%"),
     "tpm_esperada_11m": ("F089.TPM.TAS.14.M", "TPM esperada en 11 meses", "%"),
 }

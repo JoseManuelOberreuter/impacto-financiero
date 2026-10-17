@@ -1,0 +1,46 @@
+{
+  "fuente": "INE, IX Encuesta de Presupuestos Familiares (EPF)",
+  "periodo": {"desde": "2021-10-01", "hasta": "2022-09-30"},
+  "publicada": "2023-10-26",
+  "cobertura": "Hogares urbanos de las capitales regionales y sus zonas conurbadas: 15.134 hogares de 79 comunas de las 16 regiones",
+  "gasto_mensual_promedio": {
+    "total_capitales_regionales": 1451782,
+    "gran_santiago": 1590105,
+    "macrozona_norte": 1325057,
+    "macrozona_centro": 1254635,
+    "macrozona_sur": 1247895
+  },
+  "gasto_mensual_mediano": {"gran_santiago": 1204455},
+  "gasto_per_capita_promedio": {"total_capitales_regionales": 564680},
+  "ingreso_promedio_hogar": {"total_capitales_regionales": 1413349},
+  "gasto_alimentos_promedio_hogar": {"total_capitales_regionales": 307947},
+  "estructura_gasto_por_division": {
+    "nota": "Porcentaje del gasto de los hogares de las capitales regionales (no solo Gran Santiago). Suma 99,9 % por redondeo.",
+    "alimentos_y_bebidas_no_alcoholicas": 21.2,
+    "vivienda_agua_electricidad_gas_y_combustibles": 16.0,
+    "transporte": 15.0,
+    "salud": 7.9,
+    "informacion_y_comunicaciones": 6.7,
+    "restaurantes_y_alojamiento": 6.1,
+    "muebles_equipamiento_y_mantencion_hogar": 6.1,
+    "seguros_y_servicios_financieros": 4.5,
+    "recreacion_deporte_y_cultura": 4.4,
+    "educacion": 4.0,
+    "cuidado_personal_y_otros": 3.7,
+    "vestuario_y_calzado": 2.8,
+    "bebidas_alcoholicas_tabaco_y_estupefacientes": 1.5
+  },
+  "enlaces": {
+    "nota_de_prensa": "https://www.ine.gob.cl/sala-de-prensa/prensa/general/noticia/2023/10/26/hogares-en-chile-gastan-más-de-1-4-millones-de-pesos-en-promedio-al-mes-el-21-2-de-ese-monto-es-para-alimentación",
+    "pagina_epf": "https://www.ine.gob.cl/estadisticas-por-tema/sociedad-y-condiciones-de-vida/encuesta-de-presupuestos-familiares",
+    "informe_principales_resultados": "https://www.ine.gob.cl/docs/default-source/encuesta-de-presupuestos-familiares/publicaciones-y-anuarios/ix-epf-(octubre-2021---septiembre-2022)/informe-de-principales-resultados-ix-epf.pdf",
+    "metodologia": "https://www.ine.gob.cl/docs/default-source/encuesta-de-presupuestos-familiares/metodologia/ix-epf-(octubre-2021---septiembre-2022)/metodologia-ix-epf.pdf",
+    "bases_de_datos_csv": {
+      "personas": "https://www.ine.gob.cl/docs/default-source/encuesta-de-presupuestos-familiares/bbdd/ix-epf-(octubre-2021---septiembre-2022)/base-personas-ix-epf-(formato-csv).csv",
+      "gastos": "https://www.ine.gob.cl/docs/default-source/encuesta-de-presupuestos-familiares/bbdd/ix-epf-(octubre-2021---septiembre-2022)/base-gastos-ix-epf-(formato-csv).csv",
+      "cantidades": "https://www.ine.gob.cl/docs/default-source/encuesta-de-presupuestos-familiares/bbdd/ix-epf-(octubre-2021---septiembre-2022)/base-cantidades-ix-epf-(formato-csv).csv",
+      "ccif": "https://www.ine.gob.cl/docs/default-source/encuesta-de-presupuestos-familiares/bbdd/ix-epf-(octubre-2021---septiembre-2022)/ccif-ix-epf-(formato-csv).csv"
+    }
+  },
+  "proxima_edicion": "X EPF: recolección de septiembre de 2026 a agosto de 2027"
+}

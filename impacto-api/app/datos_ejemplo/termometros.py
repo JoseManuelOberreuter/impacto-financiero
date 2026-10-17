@@ -16,6 +16,7 @@ from pathlib import Path
 from app.calculos.presion import evaluar, la_mas_alta
 from app.datos_ejemplo import banco_central as bc
 from app.datos_ejemplo import cmf, cne
+from app.datos_ejemplo.impacto import impacto
 from app.datos_ejemplo.precios import CANASTA, PRODUCTOS, PRODUCTOS_POR_ID, con_articulo
 from app.modelos.termometros import (
     BandaNormal,
@@ -291,6 +292,54 @@ def _texto_fondos() -> str:
 _PRESION_MARRAQUETA, _BANDA_MARRAQUETA = evaluar(_MARRAQUETA.precio, [p.precio for p in _MARRAQUETA.serie])
 _PRESION_CANASTA, _ = evaluar(CANASTA.total, [p.precio for p in CANASTA.serie])
 
+# --- Impacto Financiero: la inflación en pesos para un hogar típico (impacto.py) ---
+
+_IMPACTO = impacto()
+
+
+def _ipc_12m(id_: str, nombre: str, descripcion: str) -> tuple[Indicador, Presion]:
+    """Variación en 12 meses de un índice de IPC por división, con su historia como gráfico."""
+    puntos = bc.SERIES[id_].puntos
+    por_mes = {(p.fecha.year, p.fecha.month): p.valor for p in puntos}
+    serie = [
+        PuntoSerie(fecha=p.fecha, valor=(p.valor / por_mes[(p.fecha.year - 1, p.fecha.month)] - 1) * 100)
+        for p in puntos
+        if (p.fecha.year - 1, p.fecha.month) in por_mes
+    ]
+    presion, banda = evaluar(serie[-1].valor, [p.valor for p in serie])
+    return Indicador(
+        id=id_,
+        nombre=nombre,
+        valor=bc.pct(serie[-1].valor, signo=True),
+        variacion="en 12 meses",
+        presion=presion,
+        descripcion=descripcion,
+        serie=serie[-12:],
+        banda_normal=banda,
+        fuente="INE, vía Banco Central",
+        dato_al=bc.fin_de_mes(serie[-1].fecha),
+    ), presion
+
+
+_IND_IPC_TRANSPORTE, _ = _ipc_12m("ipc_transporte", "IPC de transporte", "Combustibles, pasajes y vehículos.")
+_IND_IPC_ALIMENTOS, _ = _ipc_12m("ipc_alimentos", "IPC de alimentos", "Alimentos y bebidas no alcohólicas.")
+_IND_IPC_VIVIENDA, _ = _ipc_12m("ipc_vivienda", "IPC de vivienda y servicios básicos", "Arriendo, luz, agua y gas.")
+_PRESION_IMPACTO = bc.SERIES["ipc_12m"].presion()[0]
+
+
+def _signo_pesos(valor: float) -> str:
+    return ("+" if valor > 0 else "−" if valor < 0 else "") + _pesos(abs(valor))
+
+
+def _texto_impacto() -> str:
+    mayor = max((r for r in _IMPACTO.rubros if r.id != "otros"), key=lambda r: r.diferencia_anual)
+    return (
+        f"Un hogar típico de Santiago gasta {_pesos(abs(_IMPACTO.diferencia_anual))} "
+        f"{'más' if _IMPACTO.diferencia_anual >= 0 else 'menos'} al mes que hace un año. "
+        f"Lo que más subió fue {mayor.nombre.lower()} ({bc.pct(mayor.variacion_anual, signo=True)})."
+    )
+
+
 _PRESION_BOLSILLO = la_mas_alta(_PRESION_IPC, _PRESION_BENCINA)
 _PRESION_ACTIVIDAD = la_mas_alta(_PRESION_DESEMPLEO, _PRESION_IMACEC)
 
@@ -299,6 +348,19 @@ def _etiqueta(presion: Presion) -> str:
     return f"Presión {presion.value}"
 
 TERMOMETROS = [
+    Termometro(
+        id="impacto",
+        nombre="Impacto Financiero",
+        pregunta="¿Cuánto más me cuesta vivir?",
+        presion=_PRESION_IMPACTO,
+        etiqueta_presion=_etiqueta(_PRESION_IMPACTO),
+        tendencia=bc.tendencia(_IMPACTO.diferencia_mensual, 0),
+        dato_clave=f"{_signo_pesos(_IMPACTO.diferencia_anual)} al mes que hace un año",
+        frase=_texto_impacto(),
+        dato_al=bc.fin_de_mes(_IMPACTO.periodo),
+        proxima_actualizacion=None,
+        fuentes=["INE", "Banco Central"],
+    ),
     Termometro(
         id="bolsillo",
         nombre="Bolsillo",
@@ -387,6 +449,19 @@ _METODOLOGIA = (
 )
 
 _DETALLES = {
+    "impacto": dict(
+        explicacion=(
+            f"{_texto_impacto()} Frente al mes anterior, la diferencia es de "
+            f"{_signo_pesos(_IMPACTO.diferencia_mensual)}. {_IMPACTO.metodologia}"
+        ),
+        indicadores=[_IND_IPC_TRANSPORTE, _IND_IPC_ALIMENTOS, _IND_IPC_VIVIENDA],
+        percepcion=None,
+        proximas_publicaciones=[
+            Publicacion(fecha=date(2026, 11, 9), nombre="IPC de octubre", fuente="INE"),
+        ],
+        herramienta_relacionada="Mi impacto",
+        impacto=_IMPACTO,
+    ),
     "bolsillo": dict(
         explicacion=(
             f"{_texto_canasta()} {_texto_alimentos()} "
@@ -515,6 +590,4 @@ def termometros_de_ejemplo() -> list[Termometro]:
 def termometro_de_ejemplo(id_: str) -> TermometroDetalle | None:
     if id_ not in _POR_ID:
         return None
-    return TermometroDetalle(
-        **_POR_ID[id_].model_dump(), **_DETALLES[id_], metodologia=_METODOLOGIA
-    )
+    return TermometroDetalle(**_POR_ID[id_].model_dump(), **_DETALLES[id_], metodologia=_METODOLOGIA)

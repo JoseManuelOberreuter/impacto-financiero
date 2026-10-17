@@ -7,7 +7,7 @@ cliente = TestClient(app)
 
 def test_cada_termometro_tiene_detalle():
     termometros = cliente.get("/v1/termometros").json()
-    assert len(termometros) == 6
+    assert len(termometros) == 7
     for t in termometros:
         detalle = cliente.get(f"/v1/termometros/{t['id']}")
         assert detalle.status_code == 200

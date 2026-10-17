@@ -4,6 +4,7 @@ from datetime import date
 
 from pydantic import BaseModel, Field
 
+from app.modelos.impacto import ImpactoFinanciero
 from app.modelos.precios import Canasta
 from app.modelos.termometros import Presion, Tendencia, Termometro
 
@@ -31,6 +32,7 @@ class Home(BaseModel):
         description="True mientras los datos no vengan de las fuentes reales"
     )
     resumen: Resumen
+    impacto: ImpactoFinanciero = Field(description="Protagonista del Inicio: la inflación en pesos para un hogar típico")
     canasta: Canasta
     cambios: list[CambioSemana]
     termometros: list[Termometro] = Field(description="Todos los termómetros disponibles")

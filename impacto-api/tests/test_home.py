@@ -30,3 +30,13 @@ def test_cambios_enlazan_a_su_detalle_y_tienen_serie():
     for cambio in cambios:
         assert len(cambio["serie"]) >= 2
         assert cliente.get("/v1" + cambio["enlace"]).status_code == 200
+
+
+def test_impacto_financiero_suma_sus_rubros():
+    impacto = cliente.get("/v1/home").json()["impacto"]
+    rubros = impacto["rubros"]
+    assert [r["id"] for r in rubros][-1] == "otros"
+    assert abs(sum(r["gasto_mes"] for r in rubros) - impacto["gasto_mes"]) <= len(rubros)
+    assert sum(r["diferencia_anual"] for r in rubros) == impacto["diferencia_anual"]
+    # El gasto de la encuesta (2021-2022) llevado a hoy debe ser mayor que el original.
+    assert impacto["gasto_mes"] > 1_590_105

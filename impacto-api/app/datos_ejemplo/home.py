@@ -12,6 +12,7 @@ from datetime import date
 from app.calculos.presion import evaluar
 from app.datos_ejemplo import banco_central as bc
 from app.datos_ejemplo import cne
+from app.datos_ejemplo.impacto import impacto
 from app.datos_ejemplo.precios import CANASTA, PRODUCTOS, con_articulo, es_plural
 from app.datos_ejemplo.termometros import TERMOMETROS, termometro_de_ejemplo
 from app.modelos.home import CambioSemana, Home, Resumen
@@ -288,6 +289,7 @@ def home_de_ejemplo() -> Home:
             titulo=_titulo(),
             texto=_texto_resumen(),
         ),
+        impacto=impacto(),
         canasta=CANASTA,
         cambios=_cambios(),
         termometros=TERMOMETROS,

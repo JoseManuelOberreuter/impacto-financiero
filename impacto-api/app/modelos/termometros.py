@@ -5,6 +5,8 @@ from enum import Enum
 
 from pydantic import BaseModel, Field
 
+from app.modelos.impacto import ImpactoFinanciero
+
 
 class Presion(str, Enum):
     """Presión respecto de lo normal del propio indicador."""
@@ -81,3 +83,6 @@ class TermometroDetalle(Termometro):
     proximas_publicaciones: list[Publicacion]
     metodologia: str
     herramienta_relacionada: str | None = None
+    impacto: ImpactoFinanciero | None = Field(
+        default=None, description="Solo en el termómetro Impacto Financiero: el detalle por rubro"
+    )
