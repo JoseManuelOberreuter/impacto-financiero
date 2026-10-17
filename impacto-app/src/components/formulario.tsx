@@ -1,5 +1,5 @@
 import { Check, Circle, Eye, EyeOff } from 'lucide-react-native';
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -151,7 +151,8 @@ export function Casilla({
 }: {
   marcada: boolean;
   onCambiar: (marcada: boolean) => void;
-  texto: string;
+  /** Texto o contenido con enlaces (por ejemplo, a los términos). */
+  texto: ReactNode;
 }) {
   const theme = useTheme();
 

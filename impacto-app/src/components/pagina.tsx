@@ -3,13 +3,14 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'reac
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { FondoAmbiente } from '@/components/fondo-ambiente';
+import { PieLegal } from '@/components/pie-legal';
 import { ThemedText } from '@/components/themed-text';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
 import type { EstadoCarga } from '@/hooks/use-api';
 import { useDiseno } from '@/hooks/use-diseno';
 import { useTheme } from '@/hooks/use-theme';
 
-/** Estructura común de todas las pantallas: fondo con luces, scroll y columna centrada. */
+/** Estructura común de todas las pantallas: fondo con luces, scroll, columna centrada y pie legal. */
 export function Pagina({ children }: { children: ReactNode }) {
   const { espacioArriba, espacioAbajo } = useDiseno();
 
@@ -23,7 +24,10 @@ export function Pagina({ children }: { children: ReactNode }) {
             styles.scroll,
             { paddingTop: Spacing.three + espacioArriba, paddingBottom: Spacing.six + espacioAbajo },
           ]}>
-          <View style={styles.columna}>{children}</View>
+          <View style={styles.columna}>
+            {children}
+            <PieLegal />
+          </View>
         </ScrollView>
       </SafeAreaView>
     </View>

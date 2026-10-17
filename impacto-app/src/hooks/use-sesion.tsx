@@ -6,6 +6,7 @@ import { Platform } from 'react-native';
 
 import { enviar } from '@/api/cliente';
 import { cuentasDisponibles, supabase } from '@/api/supabase';
+import { VERSION_LEGAL } from '@/constants/legal';
 
 type Resultado = { ok: true } | { ok: false; error: { message?: string; code?: string } };
 
@@ -96,7 +97,12 @@ export function ProveedorSesion({ children }: { children: ReactNode }) {
         email: correo.trim(),
         password: clave,
         options: {
-          data: nombre.trim() ? { nombre: nombre.trim() } : {},
+          // Prueba del consentimiento (Ley 21.719): qué versión de los textos legales aceptó y cuándo.
+          data: {
+            ...(nombre.trim() ? { nombre: nombre.trim() } : {}),
+            terminos_version: VERSION_LEGAL,
+            terminos_aceptados_el: new Date().toISOString(),
+          },
           emailRedirectTo: enlaceDeVuelta('/cuenta'),
         },
       });

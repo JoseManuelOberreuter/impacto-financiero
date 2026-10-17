@@ -85,7 +85,23 @@ export default function CrearCuentaScreen() {
         <Casilla
           marcada={acepta}
           onCambiar={setAcepta}
-          texto="Acepto los términos de uso y la política de privacidad. Solo guardamos tu correo y tu nombre."
+          texto={
+            <>
+              Acepto los{' '}
+              <Link href="/legal/terminos" style={styles.enlace}>
+                términos de uso
+              </Link>{' '}
+              (incluido el{' '}
+              <Link href="/legal/aviso" style={styles.enlace}>
+                aviso legal
+              </Link>
+              : la app no es asesoría financiera) y la{' '}
+              <Link href="/legal/privacidad" style={styles.enlace}>
+                política de privacidad
+              </Link>
+              .
+            </>
+          }
         />
 
         {error && <Aviso texto={error} />}
@@ -110,6 +126,9 @@ const styles = StyleSheet.create({
   tarjeta: {
     padding: Spacing.four,
     gap: Spacing.three,
+  },
+  enlace: {
+    textDecorationLine: 'underline',
   },
   pie: {
     flexDirection: 'row',
